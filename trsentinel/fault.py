@@ -23,8 +23,9 @@ electrodes. Two things follow, and both are applied:
 
 `I_s` and `Q_s` depend on `V`, which depends on them, so the two are coupled
 with a staggered explicit scheme: each 5 s step uses the voltage at the start of
-the step. `scripts/eval_leadtime.py --verify-coupling` halves the step and
-reports the difference, so the size of that approximation is measured.
+the step. `scripts/verify_twin.py` reruns one window at a quarter of the step
+and reports the difference, so the size of that approximation is measured
+rather than assumed.
 """
 from __future__ import annotations
 

@@ -27,7 +27,7 @@ halves are never mixed:
 
 | | what it is | where the numbers come from |
 |---|---|---|
-| **False-alarm rate** | how often the band fires when nothing is wrong | **real cells.** 46 A123 LFP 18650s from the Severson/TRI dataset, twin fitted on 10, threshold calibrated on 12, rate measured on 24 never-seen cells |
+| **False-alarm rate** | how often the band fires when nothing is wrong | **real cells.** 46 LFP 18650s (Severson/TRI) and 30 LCO 18650s (NASA PCoE). For each corpus the twin is fitted on ~22% of the cells, the threshold is calibrated on ~26%, and the rate is measured on the rest — cells used for nothing else |
 | **Lead time** | how early the alarm fires once a short exists | **simulation.** A resistance across the electrodes, injected into the twin, added to a real measured temperature trace so the alarm still has to clear that cell's real residual noise floor |
 
 The previous version of this repo reported "655 steps of lead time" from a
@@ -42,58 +42,70 @@ writes — see [`RESULTS.md`](RESULTS.md). Nothing is hand-typed.
 <!-- BEGIN:headline -->
 <!-- END:headline -->
 
-## The corpus: 46 real cells, two duty cycles
+## The corpora: 76 real cells from two laboratories
 
-Severson et al. 2019 (TRI / Stanford / MIT fast-charging dataset), batch 1: A123
-APR18650M1A LFP/graphite cells, 1.1 Ah, cycled to failure in a 30 °C chamber
-with a thermocouple on the can and 5 s logging of I, V and T. Two
-constant-current windows are cut out of every cycle, and the difference between
-them decides the whole result:
+- **Severson et al. 2019** (TRI / Stanford / MIT fast-charging dataset), batch 1:
+  46 A123 APR18650M1A LFP/graphite cells, 1.1 Ah, cycled to failure in a 30 °C
+  forced-convection chamber, thermocouple on the can, 5 s logging.
+- **NASA Ames PCoE Battery Data Set** (Saha & Goebel): 30 LCO/graphite 18650s,
+  2 Ah, discharged at 1–4 A with the chamber at 4, 24 or 43 °C, ~19 s logging.
+
+Three constant-current windows are cut out of them, and the difference between
+the first and the other two decides most of the result:
 
 <!-- BEGIN:data -->
 <!-- END:data -->
 
-Every cell in the dataset is discharged the same way — 4C to 2.0 V — so the
-discharge window is a duty cycle that repeats identically, forever. The charge
-is the experiment's variable: 72 policies, a first constant-current step
-anywhere from 3.6C to 8C, sometimes stepping down inside the window. That gives
-one real dataset with a fixed duty cycle and a varied one, which is exactly the
-axis a model-based detector should be judged on.
+Every cell in the Severson dataset is discharged the same way — 4C to 2.0 V — so
+that window is a duty cycle that repeats identically, forever, and a detector
+that just remembers what a cell's temperature usually does will look very good on
+it. The other two windows are not like that: the Severson charge is the
+experiment's variable (72 policies, a first constant-current step from 3.6C to
+8C, sometimes stepping down mid-window), and the NASA corpus varies both current
+and chamber temperature between cells. Whether a model of the cell is worth
+having is decided on that axis, so the same pipeline is run on all three.
 
-Both windows stay strictly inside constant-current control. During the 2.0 V and
-3.6 V holds the cycler controls voltage, not current, and a current-driven twin
-cannot reproduce a clamped terminal voltage — including those samples would
-score the twin on a mismatch that has nothing to do with the cell.
+Every window stays strictly inside constant-current control. During the
+constant-voltage holds the cycler controls voltage, not current, and a
+current-driven twin cannot reproduce a clamped terminal voltage — including
+those samples would score the twin on a mismatch that has nothing to do with the
+cell.
 
 ## The twin, and whether it tracks a real cell
 
-An **SPMe with a lumped thermal submodel**, PyBAMM's `Prada2013` LFP/graphite
-chemistry, driven by the measured current. Five scalars are identified against
-real cycles: electrode area, lithium inventory per amp-hour of *measured*
-discharge capacity, contact resistance, heat transfer coefficient and thermal
-mass. Ageing enters as a measurement, not a fit — each window's inventory is set
-from the capacity that cycle actually delivered.
+An **SPMe with a lumped thermal submodel**, driven by the measured current:
+PyBAMM's `Prada2013` LFP/graphite chemistry for the Severson cells and
+`Ramadass2004` LCO for the NASA cells. Six scalars are identified against real
+cycles — electrode area, lithium inventory per amp-hour of *measured* discharge
+capacity, contact resistance, heat transfer coefficient, thermal mass and a
+full-cell entropic coefficient — inside a physical search box, and any parameter
+that lands on a bound is flagged in the report rather than quietly reported as
+identified. Ageing enters as a measurement, not a fit: each window's inventory is
+set from the capacity that cycle actually delivered.
 
 <!-- BEGIN:twinfit -->
 <!-- END:twinfit -->
 
 ![twin fit](assets/fig_twin_fit.png)
 
-Two heat terms had to be put back before the residual meant anything. PyBAMM's
-default heat generation closes only about half of the `I (U − V)` energy balance
-at these rates, because **heat of mixing** is off by default; and the contact
-resistance option adds a voltage drop without its own dissipation. With both
-restored the balance closes to the figure in the table above, and the identified
-heat transfer coefficient and thermal time constant land where an 18650 in a
-forced-convection chamber should. `scripts/verify_twin.py` checks this, plus
-that re-integrating the lumped ODE from the twin's own reported heat reproduces
-the twin's own reported temperature — which is what the ambient-offset trick
-behind both the contact heat and the injected fault relies on.
+Three heat terms had to be put back before the residual meant anything.
+PyBAMM's default heat generation closes only about half of the `I (U − V)`
+energy balance at these rates, because **heat of mixing** is off by default; the
+contact resistance option adds a voltage drop without its own dissipation; and
+`Prada2013` carries **no entropic coefficient at all**, so the twin had no
+reversible heat — while the real cells visibly *cool* for the first minute of a
+fast charge, which is precisely that term. With all three restored the balance
+closes to the figure in the table above, and the identified heat transfer
+coefficient and thermal time constant land where an 18650 should.
+`scripts/verify_twin.py` checks this, plus that re-integrating the lumped ODE
+from the twin's own reported heat reproduces the twin's own reported temperature
+— which is what the ambient-offset trick behind both the contact heat and the
+injected fault relies on.
 
 **The reduced-order twin this repo started with is not beaten on temperature.**
-Two parameters fitted by least squares on the same trajectories track a
-held-out cell about as well as a 5-parameter PyBAMM SPMe does. That is a real
-result and it is reported as one. What the physics twin buys is elsewhere: it
+Two parameters fitted on the same trajectories by the same criterion track a
+held-out cell about as well as the PyBAMM SPMe does. That is a real result and
+it is reported as one. What the physics twin buys is elsewhere: it
 predicts the terminal voltage too, its parameters are physical quantities rather
 than a lumped `R/C`, and — the reason this project needed it — a resistance
 across the electrodes can be *injected into it*, which is not something a model
@@ -101,8 +113,8 @@ with no voltage state can host.
 
 ## False-alarm rate on real healthy cells
 
-The real-data half. Threshold from 12 calibration cells, rate measured on 24
-cells used neither to fit the twin nor to set the threshold. An alarm is the
+The real-data half. Threshold from the calibration cells, rate measured on the
+test cells — used neither to fit the twin nor to set the threshold. An alarm is the
 residual staying above the threshold for a fixed dwell, so one scalar per window
 summarises the rule and can be used directly as a conformal nonconformity score
 — which makes `P(alarm | healthy) ≤ α` a finite-sample statement.
@@ -173,13 +185,17 @@ pip install -r requirements-full.txt
 bash scripts/run_all.sh /path/to/severson/batch1.pkl
 ```
 
-CPU only, no GPU used or wanted.
+The NASA archive is downloaded by the script if it is not already there; the
+Severson pickle is not redistributable and has to be pointed at. CPU only, no
+GPU used or wanted.
 
 ## Layout
 
 ```
 trsentinel/
-  data/severson.py   46 real cells -> rectangular constant-current windows
+  data/severson.py   46 LFP cells -> rectangular constant-current windows
+  data/nasa.py       30 LCO cells, same layout
+  datasets.py        the registry every downstream script iterates over
   twin_pybamm.py     SPMe + lumped thermal, 5 identified scalars
   fault.py           internal short: shunt current + V^2/R into the balance
   sentinel.py        reduced-order twin, conformal band, persistence rule
@@ -187,7 +203,8 @@ trsentinel/
   split.py           every split is by cell, never by cycle
   cell.py            the synthetic simulator, demo only
 scripts/
-  prepare_data.py    raw archive -> data/severson_{discharge,charge}.npz
+  prepare_data.py    Severson archive -> data/severson_{discharge,charge}.npz
+  prepare_nasa.py    NASA archives -> data/nasa_discharge.npz
   fit_twin.py        identify the twin, score it on unseen cells
   verify_twin.py     energy balance, lumped ODE, fault coupling error
   eval_far.py        false-alarm rate on real healthy cells
@@ -205,7 +222,8 @@ scripts/
 - **Two operating windows, not a full cycle.** The twin is identified and scored
   inside constant-current control. Constant-voltage holds and rests are out of
   scope.
-- **One chemistry, one form factor.** 46 LFP 18650s from one lab.
+- **Two chemistries, one form factor.** LFP and LCO 18650s, two labs, no
+  pouch or prismatic cells and no module-level thermal coupling.
 - **Cell-registered thresholds assume a known-good period.** Three healthy
   windows per cell, which a cell that arrives already faulty will not give you.
 
