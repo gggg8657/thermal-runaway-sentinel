@@ -69,6 +69,7 @@ _HEAT_CAPACITY_KEYS = [
               "Positive electrode", "Positive current collector")
 ]
 _BORROWED: dict[str, list[str]] = {}
+_BASE_CACHE: dict = {}
 
 @dataclass
 class TwinParams:
@@ -110,6 +111,12 @@ def base_parameter_values(chemistry="Prada2013", nominal_Ah=1.1,
     import pybamm
     import re as _re
 
+    # The discovery loop below builds a model up to eighteen times; doing that
+    # once per window made the whole fit an order of magnitude slower than the
+    # solves it was meant to set up.
+    key = (chemistry, nominal_Ah, v_lo, v_hi)
+    if key in _BASE_CACHE:
+        return pybamm.ParameterValues(_BASE_CACHE[key])
     p = pybamm.ParameterValues(chemistry)
     donor = pybamm.ParameterValues(DONOR)
     borrowed = []
@@ -130,7 +137,8 @@ def base_parameter_values(chemistry="Prada2013", nominal_Ah=1.1,
     p["Nominal cell capacity [A.h]"] = nominal_Ah
     p["Lower voltage cut-off [V]"] = v_lo
     p["Upper voltage cut-off [V]"] = v_hi
-    return p
+    _BASE_CACHE[key] = p
+    return pybamm.ParameterValues(p)
 
 
 _ENTROPY_KEY = "Positive electrode OCP entropic change [V.K-1]"
