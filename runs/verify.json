@@ -1,0 +1,26 @@
+{
+  "discharge": {
+    "Q_pybamm_W": 0.60487,
+    "Q_contact_W": 0.10278,
+    "Q_terminal_balance_W": 0.71301,
+    "closure": 0.98864,
+    "C_eff_J_per_K": 84.68846,
+    "hA_W_per_K": 0.16193,
+    "tau_s": 522.97939,
+    "lumped_reintegration_max_err_K": 0.11611,
+    "n_windows": 8,
+    "fault_coupling_dt5_vs_dt1.25_max_K": 0.006
+  },
+  "charge": {
+    "Q_pybamm_W": 2.19828,
+    "Q_contact_W": 0.24496,
+    "Q_terminal_balance_W": 2.58495,
+    "closure": 0.94247,
+    "C_eff_J_per_K": 130.19917,
+    "hA_W_per_K": 0.83692,
+    "tau_s": 155.56939,
+    "lumped_reintegration_max_err_K": 0.09177,
+    "n_windows": 8,
+    "fault_coupling_dt5_vs_dt1.25_max_K": 0.00024
+  }
+}

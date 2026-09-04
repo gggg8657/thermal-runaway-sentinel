@@ -1,8 +1,10 @@
-"""End-to-end smoke demo — runs with numpy only.
+"""End-to-end smoke demo on a SYNTHETIC fleet -- runs with numpy only.
 
-Trains the thermal twin on a healthy fleet, calibrates a conformal band,
-then detects a cell developing an internal short and reports the early-warning
-lead time (how many steps before the temperature visibly runs away).
+Every cell here comes out of `trsentinel/cell.py`, a toy lumped simulator. The
+demo exists so the mechanism -- twin, residual, conformal band, persistence
+rule -- can be read and run in one file with no data and no PyBAMM. **None of
+its numbers are measurements**, and none of them appear in the README's results.
+The real-data pipeline is `scripts/run_all.sh`.
 """
 import numpy as np
 from trsentinel import (
@@ -27,6 +29,7 @@ def main():
     runaway_idx = int(np.argmax(cell["T"] > healthy_Tmax + 10.0))
     runaway_idx = runaway_idx or len(cell["T"])
 
+    print("SYNTHETIC simulator -- these numbers are not measurements.")
     print(f"fault onset step:        {onset}")
     print(f"early-warning fired at:  {warn}")
     print(f"visible runaway at:      {runaway_idx}")

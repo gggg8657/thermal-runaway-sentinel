@@ -1,9 +1,14 @@
-"""Reduced-order Li-ion cell simulator (electro-thermal).
+"""SYNTHETIC Li-ion cell simulator, for the offline demo only.
 
-A lumped equivalent-circuit + thermal-ODE model, integrated with explicit
-Euler. Good enough to generate physically-plausible V/I/T traces for both
-healthy cells and cells developing an internal short (a thermal-runaway
-precursor). The real project calibrates this against PyBAMM / NASA-PCoE data.
+A lumped equivalent-circuit + thermal-ODE model integrated with explicit Euler.
+It generates physically-plausible V/I/T traces for healthy cells and for cells
+developing an internal short, which is enough to exercise the detector in
+`demo_smoke.py` with numpy alone. **Nothing here is a measurement and nothing
+here is fitted to one.**
+
+The real pipeline does not use this module: it reads measured cells through
+`trsentinel/data/severson.py`, predicts with the PyBAMM twin in
+`trsentinel/twin_pybamm.py`, and injects faults with `trsentinel/fault.py`.
 """
 from __future__ import annotations
 import numpy as np

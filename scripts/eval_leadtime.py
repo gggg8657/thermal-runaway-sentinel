@@ -36,40 +36,49 @@ from trsentinel.metrics import (
 from trsentinel.split import cell_split, subsample, windows_of
 from trsentinel.twin_pybamm import TwinParams
 
-#: constant soft shorts, plus one that worsens with time
-FAULTS = {
-    "R=500 ohm (constant)": InternalShort(R0_ohm=500.0, onset_s=200.0),
-    "R=200 ohm (constant)": InternalShort(R0_ohm=200.0, onset_s=200.0),
-    "R=100 ohm (constant)": InternalShort(R0_ohm=100.0, onset_s=200.0),
-    "R=50 ohm (constant)": InternalShort(R0_ohm=50.0, onset_s=200.0),
-    "R=20 ohm (constant)": InternalShort(R0_ohm=20.0, onset_s=200.0),
-    "worsening 500->1 ohm (tau=120 s)": InternalShort(
-        R0_ohm=500.0, onset_s=100.0, R_end_ohm=1.0, tau_s=120.0),
-}
+#: Constant soft shorts plus one that worsens with time. Onset and time
+#: constant are fractions of the window, because the windows are 200 s, 780 s
+#: and 900 s long -- a fault that starts at a fixed 200 s would begin at the
+#: last sample of the shortest one.
+ONSET_FRAC = 0.25
+WORSENING_ONSET_FRAC, WORSENING_TAU_FRAC = 0.125, 0.15
+SHORT_OHMS = (500.0, 200.0, 100.0, 50.0, 20.0)
+
+
+def build_faults(window_s):
+    onset = round(ONSET_FRAC * window_s)
+    faults = {f"R={R:.0f} ohm (constant)": InternalShort(R0_ohm=R, onset_s=onset)
+              for R in SHORT_OHMS}
+    faults["worsening 500->1 ohm"] = InternalShort(
+        R0_ohm=500.0, onset_s=round(WORSENING_ONSET_FRAC * window_s),
+        R_end_ohm=1.0, tau_s=round(WORSENING_TAU_FRAC * window_s))
+    return faults
+
 
 #: nominal false-alarm rates the lead time is reported at
 ALPHAS_REPORT = [0.05, 0.01]
 
-_D = _THETA = _KIND = None
+_D = _THETA = _KIND = _CHEM = _FAULTS = None
 
 
-def _init(path, theta_vec, kind):
-    global _D, _THETA, _KIND
+def _init(path, theta_vec, kind, chemistry):
+    global _D, _THETA, _KIND, _CHEM, _FAULTS
     _D = load_severson_windows(path)
     _THETA = TwinParams.from_vector(theta_vec)
-    _KIND = kind
+    _KIND, _CHEM = kind, chemistry
+    _FAULTS = build_faults(float(_D["t"][-1]))
 
 
 def _run_window(i):
     """Healthy twin + every fault, on one real window."""
     w = window_dict(_D, i)
-    healthy = simulate_short(w, _THETA, None, kind=_KIND)
+    healthy = simulate_short(w, _THETA, None, kind=_KIND, chemistry=_CHEM)
     out = {"i": int(i), "ok": healthy["ok"], "T_healthy": healthy["T"],
            "faults": {}}
     if not healthy["ok"]:
         return out
-    for name, f in FAULTS.items():
-        r = simulate_short(w, _THETA, f, kind=_KIND)
+    for name, f in _FAULTS.items():
+        r = simulate_short(w, _THETA, f, kind=_KIND, chemistry=_CHEM)
         out["faults"][name] = {
             "ok": r["ok"], "dT": r["T"] - healthy["T"],
             "Q_peak_W": float(np.nanmax(r["Q_short"])),
@@ -78,13 +87,14 @@ def _run_window(i):
     return out
 
 
-def _verify_coupling(path, theta, kind, i):
+def _verify_coupling(path, theta, kind, i, chemistry="Prada2013"):
     d = load_severson_windows(path)
     w = window_dict(d, i)
-    f = FAULTS["worsening 500->1 ohm (tau=120 s)"]
-    a = simulate_short(w, theta, f, kind=kind, dt=5.0)
-    b = simulate_short(w, theta, f, kind=kind, dt=1.25)
-    return {"window": int(i), "dt_coarse_s": 5.0, "dt_fine_s": 1.25,
+    f = build_faults(float(d["t"][-1]))["worsening 500->1 ohm"]
+    dt = float(d["t"][1] - d["t"][0])
+    a = simulate_short(w, theta, f, kind=kind, dt=dt, chemistry=chemistry)
+    b = simulate_short(w, theta, f, kind=kind, dt=dt / 4, chemistry=chemistry)
+    return {"window": int(i), "dt_coarse_s": dt, "dt_fine_s": dt / 4,
             "max_abs_dT_K": float(np.nanmax(np.abs(a["T"] - b["T"]))),
             "max_abs_dV_V": float(np.nanmax(np.abs(a["V"] - b["V"])))}
 
@@ -128,9 +138,11 @@ def main():
     fit = json.loads(Path(args.fit).read_text())
     theta = TwinParams(**fit["theta"])
     kind = fit["model"].split()[0]
+    chem = fit.get("chemistry", "Prada2013")
 
     d = load_severson_windows(args.data)
     dt_s = float(d["t"][1] - d["t"][0])
+    faults = build_faults(float(d["t"][-1]))
     sp = cell_split(len(d["cells"]), seed=args.seed)
     ci = d["cell_index"]
     res_pb = np.load(args.residuals)["res_pybamm"]
@@ -146,10 +158,10 @@ def main():
 
     t0 = time.time()
     with Pool(args.workers, initializer=_init,
-              initargs=(args.data, theta.as_vector(), kind)) as pool:
+              initargs=(args.data, theta.as_vector(), kind, chem)) as pool:
         runs = pool.map(_run_window, idx)
     sim_s = time.time() - t0
-    coupling = _verify_coupling(args.data, theta, kind, int(idx[0]))
+    coupling = _verify_coupling(args.data, theta, kind, int(idx[0]), chem)
 
     out = {
         "SIMULATED": ("every lead time below comes from a fault injected into "
@@ -159,10 +171,12 @@ def main():
                         "drawn inside the cell plus V^2/R of ohmic heat added to "
                         "the lumped energy balance"),
         "persist_samples": args.persist, "dt_s": dt_s,
+        "window_s": float(d["t"][-1]),
         "n_windows": int(len(idx)),
         "n_test_cells": int(len(np.unique(ci[idx]))),
         "sim_wall_s": round(sim_s, 1),
-        "sim_s_per_window_per_core": round(sim_s * args.workers / (len(idx) * (1 + len(FAULTS))), 3),
+        "sim_s_per_window_per_core": round(
+            sim_s * args.workers / (len(idx) * (1 + len(faults))), 3),
         "coupling_check": coupling,
         "thresholds_K": {v: {str(a): thr[v]["q"][a] for a in ALPHAS_REPORT}
                          for v in thr},
@@ -240,7 +254,7 @@ def main():
                 "n_windows": len(rows),
             }
 
-    for name, f in FAULTS.items():
+    for name, f in faults.items():
         entry = {"fault": f.to_dict()}
         okruns = [r for r in runs if r["ok"] and r["faults"].get(name, {}).get("ok")]
         entry["n_windows_simulated"] = len(okruns)

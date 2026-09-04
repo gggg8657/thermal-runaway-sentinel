@@ -31,19 +31,19 @@ from trsentinel.sentinel import ThermalTwin
 from trsentinel.split import cell_split, subsample, windows_of
 from trsentinel.twin_pybamm import PybammTwin, TwinParams
 
-_D = _THETA = _KIND = None
+_D = _THETA = _KIND = _CHEM = None
 
 
-def _init(path, theta_vec, kind):
-    global _D, _THETA, _KIND
+def _init(path, theta_vec, kind, chemistry):
+    global _D, _THETA, _KIND, _CHEM
     _D = load_severson_windows(path)
     _THETA = TwinParams.from_vector(theta_vec)
-    _KIND = kind
+    _KIND, _CHEM = kind, chemistry
 
 
 def _residual_one(i):
     w = window_dict(_D, i)
-    r = PybammTwin(_KIND).simulate(w, _THETA)
+    r = PybammTwin(_KIND, chemistry=_CHEM).simulate(w, _THETA)
     return int(i), r["T"], bool(r["ok"])
 
 
@@ -52,7 +52,8 @@ def main():
     ap.add_argument("--data", default="data/severson_discharge.npz")
     ap.add_argument("--fit", default="runs/twin_fit.json")
     ap.add_argument("--workers", type=int, default=54)
-    ap.add_argument("--persist", type=int, default=6, help="samples (x5 s)")
+    ap.add_argument("--persist", type=int, default=6,
+                    help="consecutive samples above the threshold")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="runs/far.json")
     ap.add_argument("--residuals", default="runs/residuals.npz")
@@ -61,6 +62,7 @@ def main():
     fit = json.loads(Path(args.fit).read_text())
     theta = TwinParams(**fit["theta"])
     kind = fit["model"].split()[0]
+    chem = fit.get("chemistry", "Prada2013")
 
     d = load_severson_windows(args.data)
     sp = cell_split(len(d["cells"]), seed=args.seed)
@@ -70,7 +72,7 @@ def main():
     Tpred = np.full(d["T"].shape, np.nan)
     ok = np.zeros(n_w, bool)
     with Pool(args.workers, initializer=_init,
-              initargs=(args.data, theta.as_vector(), kind)) as pool:
+              initargs=(args.data, theta.as_vector(), kind, chem)) as pool:
         for i, Ti, o in pool.imap_unordered(_residual_one, range(n_w), chunksize=4):
             Tpred[i] = Ti
             ok[i] = o
@@ -91,8 +93,10 @@ def main():
     ci = d["cell_index"]
 
     report = {
-        "data": {k: (v if not isinstance(v, np.ndarray) else v.tolist())
-                 for k, v in json.loads(Path("data/prepare_report.json").read_text()).items()},
+        "data": json.loads(Path(
+            f"data/prepare_report_{d['phase']}.json").read_text()),
+        "phase": str(d["phase"]),
+        "twin_fit": args.fit,
         "persist_samples": args.persist,
         "persist_s": args.persist * float(d["t"][1] - d["t"][0]),
         "n_windows": int(n_w),

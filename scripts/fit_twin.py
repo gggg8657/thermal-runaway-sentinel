@@ -19,25 +19,26 @@ from scipy.optimize import minimize
 
 from trsentinel.data.severson import load_severson_windows, window_dict
 from trsentinel.split import cell_split, subsample, windows_of
-from trsentinel.twin_pybamm import PybammTwin, TwinParams
+from trsentinel.twin_pybamm import PybammTwin, TwinParams, borrowed_keys
 
 #: 1 V of terminal-voltage error is traded against 10 K of temperature error
 V_WEIGHT_K_PER_V = 10.0
 
 _D = None
 _KIND = "SPMe"
+_CHEM = "Prada2013"
 
 
-def _init(path, kind):
-    global _D, _KIND
+def _init(path, kind, chemistry):
+    global _D, _KIND, _CHEM
     _D = load_severson_windows(path)
-    _KIND = kind
+    _KIND, _CHEM = kind, chemistry
 
 
 def _score_one(arg):
     i, vec = arg
     w = window_dict(_D, i)
-    tw = PybammTwin(_KIND)
+    tw = PybammTwin(_KIND, chemistry=_CHEM)
     r = tw.simulate(w, TwinParams.from_vector(vec))
     if not r["ok"]:
         return {"i": int(i), "ok": False, "v_rmse": np.nan, "t_rmse": np.nan,
@@ -72,6 +73,9 @@ def main():
                     help="second window set to score the fitted twin on, "
                          "without refitting (the cross-duty-cycle check)")
     ap.add_argument("--kind", default="SPMe", choices=["SPM", "SPMe", "DFN"])
+    ap.add_argument("--chemistry", default="Prada2013",
+                    help="PyBAMM parameter set, e.g. Prada2013 (LFP) or "
+                         "Ramadass2004 (LCO)")
     ap.add_argument("--workers", type=int, default=54)
     ap.add_argument("--n-fit-windows", type=int, default=60)
     ap.add_argument("--n-eval-windows", type=int, default=150)
@@ -84,26 +88,34 @@ def main():
     sp = cell_split(len(d["cells"]), seed=args.seed)
     fit_idx = subsample(windows_of(d, sp["fit"]), args.n_fit_windows, seed=1)
 
-    x0 = TwinParams(k_area=0.7, k_cap=0.9, R_contact=0.006, h_conv=30.0,
-                    c_scale=1.5).as_vector()
-    # optimise in log space: every parameter is a positive scale
-    lo = np.array([0.3, 0.4, 1e-4, 5.0, 0.4])
-    hi = np.array([2.5, 1.6, 6e-2, 200.0, 4.0])
+    x0 = TwinParams(k_area=0.7, k_cap=1.1, R_contact=0.006, h_conv=35.0,
+                    c_scale=3.0, dUdT_mV_per_K=0.0).as_vector()
+    # Optimise in an unbounded space mapped through a logistic onto the physical
+    # box, so the entropic coefficient can go negative and no parameter can walk
+    # off into a value nobody would defend.
+    lo, hi = TwinParams.LO, TwinParams.HI
+
+    def to_phys(z):
+        return lo + (hi - lo) / (1.0 + np.exp(-np.asarray(z, float)))
+
+    def to_z(x):
+        u = np.clip((np.asarray(x, float) - lo) / (hi - lo), 1e-4, 1 - 1e-4)
+        return np.log(u / (1 - u))
 
     hist = []
     t0 = time.time()
     with Pool(args.workers, initializer=_init,
-              initargs=(args.data, args.kind)) as pool:
+              initargs=(args.data, args.kind, args.chemistry)) as pool:
         def obj(z):
-            vec = np.clip(np.exp(z), lo, hi)
+            vec = to_phys(z)
             s = score(pool, fit_idx, vec)
             hist.append({"vec": vec.tolist(), **{k: v for k, v in s.items()}})
             return s["objective"]
 
-        res = minimize(obj, np.log(x0), method="Nelder-Mead",
+        res = minimize(obj, to_z(x0), method="Nelder-Mead",
                        options={"maxiter": args.maxiter, "xatol": 1e-3,
                                 "fatol": 1e-4, "adaptive": True})
-        best = np.clip(np.exp(res.x), lo, hi)
+        best = to_phys(res.x)
         theta = TwinParams.from_vector(best)
         fit_s = time.time() - t0
 
@@ -137,7 +149,7 @@ def main():
     cross = {}
     if args.cross_data:
         with Pool(args.workers, initializer=_init,
-                  initargs=(args.cross_data, args.kind)) as pool:
+                  initargs=(args.cross_data, args.kind, args.chemistry)) as pool:
             dc = load_severson_windows(args.cross_data)
             spc = cell_split(len(dc["cells"]), seed=args.seed)
             for name in ("fit", "cal", "test"):
@@ -151,7 +163,11 @@ def main():
         "phase": str(d["phase"]),
         "data": args.data,
         "cross_phase": cross,
-        "chemistry": "Prada2013 LFP/graphite, Chen2020 thermal properties",
+        "chemistry": args.chemistry,
+        "borrowed_from_donor": borrowed_keys(args.chemistry),
+        "at_bound": {n: bool(min(abs(v - l), abs(v - h)) < 0.01 * (h - l))
+                     for n, v, l, h in zip(TwinParams.NAMES, best,
+                                           TwinParams.LO, TwinParams.HI)},
         "theta": theta.to_dict(),
         "theta_names": list(TwinParams.NAMES),
         "n_fit_windows": len(fit_idx),

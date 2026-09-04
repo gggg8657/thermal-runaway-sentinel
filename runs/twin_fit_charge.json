@@ -1,0 +1,161 @@
+{
+  "model": "SPMe + lumped thermal (PyBAMM)",
+  "phase": "charge",
+  "data": "data/severson_charge.npz",
+  "cross_phase": {
+    "fit": {
+      "objective": 1000.0,
+      "frac_ok": 0.0,
+      "n": 150
+    },
+    "cal": {
+      "objective": 1000.0,
+      "frac_ok": 0.0,
+      "n": 150
+    },
+    "test": {
+      "objective": 1000.0,
+      "frac_ok": 0.0,
+      "n": 150
+    },
+    "phase": "discharge"
+  },
+  "chemistry": "Prada2013 LFP/graphite, Chen2020 thermal properties",
+  "theta": {
+    "k_area": 0.38830786757718794,
+    "k_cap": 1.6,
+    "R_contact": 0.007518958791942624,
+    "h_conv": 200.0,
+    "c_scale": 4.0
+  },
+  "theta_names": [
+    "k_area",
+    "k_cap",
+    "R_contact",
+    "h_conv",
+    "c_scale"
+  ],
+  "n_fit_windows": 60,
+  "n_eval_windows_per_split": 150,
+  "split_cells": {
+    "fit": [
+      "batch1_cell1",
+      "batch1_cell2",
+      "batch1_cell4",
+      "batch1_cell11",
+      "batch1_cell18",
+      "batch1_cell19",
+      "batch1_cell20",
+      "batch1_cell21",
+      "batch1_cell42",
+      "batch1_cell43"
+    ],
+    "cal": [
+      "batch1_cell3",
+      "batch1_cell6",
+      "batch1_cell10",
+      "batch1_cell16",
+      "batch1_cell22",
+      "batch1_cell23",
+      "batch1_cell27",
+      "batch1_cell28",
+      "batch1_cell30",
+      "batch1_cell32",
+      "batch1_cell35",
+      "batch1_cell39"
+    ],
+    "test": [
+      "batch1_cell0",
+      "batch1_cell5",
+      "batch1_cell7",
+      "batch1_cell8",
+      "batch1_cell9",
+      "batch1_cell12",
+      "batch1_cell13",
+      "batch1_cell14",
+      "batch1_cell15",
+      "batch1_cell17",
+      "batch1_cell24",
+      "batch1_cell25",
+      "batch1_cell26",
+      "batch1_cell29",
+      "batch1_cell31",
+      "batch1_cell33",
+      "batch1_cell34",
+      "batch1_cell36",
+      "batch1_cell37",
+      "batch1_cell38",
+      "batch1_cell40",
+      "batch1_cell41",
+      "batch1_cell44",
+      "batch1_cell45"
+    ]
+  },
+  "split_sizes": {
+    "fit": 10,
+    "cal": 12,
+    "test": 24
+  },
+  "objective": "T_rmse[K] + 10 * V_rmse[V] + 5*(1-frac_solved)",
+  "n_objective_evals": 511,
+  "fit_wall_s": 835.6,
+  "pybamm": {
+    "fit": {
+      "objective": 1.150394035183636,
+      "v_rmse": 0.061953338196127396,
+      "t_rmse": 0.5308606532223621,
+      "frac_ok": 1.0,
+      "n": 150,
+      "t_bias": -0.326837359369112,
+      "t_rmse_p95": 0.6958630667196226,
+      "v_rmse_p95": 0.06761344450186027
+    },
+    "cal": {
+      "objective": 1.325090757215863,
+      "v_rmse": 0.057991296351463634,
+      "t_rmse": 0.7451777937012267,
+      "frac_ok": 1.0,
+      "n": 150,
+      "t_bias": -0.0006571927742967413,
+      "t_rmse_p95": 1.2832789065916663,
+      "v_rmse_p95": 0.07158482242690581
+    },
+    "test": {
+      "objective": 1.334232884176307,
+      "v_rmse": 0.05683780063152466,
+      "t_rmse": 0.7658548778610604,
+      "frac_ok": 1.0,
+      "n": 150,
+      "t_bias": -0.2139096912587534,
+      "t_rmse_p95": 1.7483582320138769,
+      "v_rmse_p95": 0.06839799122155406
+    }
+  },
+  "rom_lumped_lstsq": {
+    "fit": {
+      "t_rmse": 0.31917033872155826,
+      "t_rmse_p95": 0.6097787383148755,
+      "t_bias": -0.10479670181061623,
+      "n": 150,
+      "frac_ok": 1.0
+    },
+    "cal": {
+      "t_rmse": 0.5185416513068403,
+      "t_rmse_p95": 1.0420875962580582,
+      "t_bias": 0.14064291602253093,
+      "n": 150,
+      "frac_ok": 1.0
+    },
+    "test": {
+      "t_rmse": 0.5341815755750744,
+      "t_rmse_p95": 1.153835951132904,
+      "t_bias": -0.022342395738026318,
+      "n": 150,
+      "frac_ok": 1.0
+    }
+  },
+  "rom_params": {
+    "R_over_C_K_per_J": 0.0003613830845358122,
+    "h_over_C_per_s": 0.003311108015700046
+  }
+}

@@ -68,7 +68,8 @@ class InternalShort:
 
 
 def simulate_short(window, theta: TwinParams, short: InternalShort | None,
-                   kind="SPMe", dt=None, initial_soc=None):
+                   kind="SPMe", dt=None, initial_soc=None,
+                   chemistry="Prada2013"):
     """Run the twin over one window with (or without) an internal short.
 
     Returns `V, T, I_short, Q_short, t` on the window's own time grid. With
@@ -80,11 +81,12 @@ def simulate_short(window, theta: TwinParams, short: InternalShort | None,
 
     t = np.asarray(window["t"], float)
     step = float(t[1] - t[0]) if dt is None else float(dt)
-    tw = PybammTwin(kind)
+    tw = PybammTwin(kind, chemistry=chemistry)
     p = tw._params_for(theta, t, window["I"], window["T_amb"], window["T0"],
                        window["Qd_cycle"])
     p["Current function [A]"] = p["Current function [A]"] + pybamm.InputParameter("I_short")
-    p["Ambient temperature [K]"] = (window["T_amb"] + 273.15
+    # _params_for already folded the contact-resistance heat into the ambient
+    p["Ambient temperature [K]"] = (p["Ambient temperature [K]"]
                                     + pybamm.InputParameter("dT_amb"))
     hA = theta.h_conv * CELL_AREA_M2
 
