@@ -150,7 +150,7 @@ def sec_twin(fits, verify):
     if verify:
         rows = []
         for ph in PHASES:
-            v = verify.get(ph) or verify.get(f"{ph}_discharge")
+            v = verify.get(ph)
             if not v:
                 continue
             rows.append([

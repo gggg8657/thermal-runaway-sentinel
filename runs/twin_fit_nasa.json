@@ -1,0 +1,128 @@
+{
+  "model": "SPMe + lumped thermal (PyBAMM)",
+  "phase": "discharge",
+  "data": "data/nasa_discharge.npz",
+  "cross_phase": {},
+  "chemistry": "Ramadass2004",
+  "borrowed_from_donor": [
+    "Cell volume [m3]",
+    "Total heat transfer coefficient [W.m-2.K-1]",
+    "Cell cooling surface area [m2]"
+  ],
+  "at_bound": {
+    "k_area": false,
+    "k_cap": false,
+    "R_contact": false,
+    "h_conv": false,
+    "c_scale": false,
+    "dUdT_mV_per_K": false
+  },
+  "theta": {
+    "k_area": 0.7,
+    "k_cap": 1.1,
+    "R_contact": 0.006000000000000002,
+    "h_conv": 34.99999999999999,
+    "c_scale": 3.0,
+    "dUdT_mV_per_K": 0.0
+  },
+  "theta_names": [
+    "k_area",
+    "k_cap",
+    "R_contact",
+    "h_conv",
+    "c_scale",
+    "dUdT_mV_per_K"
+  ],
+  "n_fit_windows": 60,
+  "n_eval_windows_per_split": 150,
+  "split_cells": {
+    "fit": [
+      "B0007",
+      "B0029",
+      "B0036",
+      "B0038",
+      "B0048",
+      "B0053",
+      "B0055"
+    ],
+    "cal": [
+      "B0018",
+      "B0031",
+      "B0033",
+      "B0043",
+      "B0045",
+      "B0050",
+      "B0052",
+      "B0056"
+    ],
+    "test": [
+      "B0005",
+      "B0006",
+      "B0030",
+      "B0032",
+      "B0034",
+      "B0039",
+      "B0040",
+      "B0041",
+      "B0042",
+      "B0044",
+      "B0046",
+      "B0047",
+      "B0049",
+      "B0051",
+      "B0054"
+    ]
+  },
+  "split_sizes": {
+    "fit": 7,
+    "cal": 8,
+    "test": 15
+  },
+  "objective": "T_rmse[K] + 10 * V_rmse[V] + 5*(1-frac_solved)",
+  "n_objective_evals": 215,
+  "fit_wall_s": 781.3,
+  "pybamm": {
+    "fit": {
+      "objective": 1000.0,
+      "frac_ok": 0.0,
+      "n": 150
+    },
+    "cal": {
+      "objective": 1000.0,
+      "frac_ok": 0.0,
+      "n": 150
+    },
+    "test": {
+      "objective": 1000.0,
+      "frac_ok": 0.0,
+      "n": 150
+    }
+  },
+  "rom_lumped_lstsq": {
+    "fit": {
+      "t_rmse": 1.692140092461422,
+      "t_rmse_p95": 3.4959360455629134,
+      "t_bias": 1.20305358010788,
+      "n": 150,
+      "frac_ok": 1.0
+    },
+    "cal": {
+      "t_rmse": 2.1055910510208324,
+      "t_rmse_p95": 4.125931511938514,
+      "t_bias": 1.7118681180766984,
+      "n": 150,
+      "frac_ok": 1.0
+    },
+    "test": {
+      "t_rmse": 2.4294232502401867,
+      "t_rmse_p95": 5.126705493119029,
+      "t_bias": 1.924972576449375,
+      "n": 150,
+      "frac_ok": 1.0
+    }
+  },
+  "rom_params": {
+    "R_over_C_K_per_J": 0.0014331017051905787,
+    "h_over_C_per_s": 0.000568936646955317
+  }
+}

@@ -77,6 +77,41 @@ def test_coupling_error_is_small_at_the_5_s_step():
     assert np.nanmax(np.abs(coarse["T"] - fine["T"])) < 0.25
 
 
+def test_initial_stoichiometries_survive_the_capacity_rescaling():
+    """The twin resolves its own initial state instead of using `initial_soc=`.
+
+    That is only legitimate if scaling both electrodes' maximum *and* initial
+    concentrations leaves the stoichiometry window alone -- otherwise every
+    window would need its own electrode-SOH solve.
+    """
+    from trsentinel.twin_pybamm import base_parameter_values, initial_stoichiometries
+
+    base = base_parameter_values("Prada2013")
+    ref = initial_stoichiometries(base, "Prada2013", 1.0)
+    scaled = pybamm.ParameterValues(base)
+    for el in ("negative", "positive"):
+        for tmpl in ("Maximum concentration in {} electrode [mol.m-3]",
+                     "Initial concentration in {} electrode [mol.m-3]"):
+            scaled[tmpl.format(el)] = base[tmpl.format(el)] * 1.4
+    scaled["Electrode height [m]"] = base["Electrode height [m]"] * 0.6
+    got = pybamm.lithium_ion.get_initial_stoichiometries(1.0, scaled)
+    assert abs(float(got[0]) - ref[0]) < 1e-9
+    assert abs(float(got[1]) - ref[1]) < 1e-9
+
+
+def test_entropic_coefficient_changes_the_heat_and_still_solves():
+    """A nonzero entropic coefficient used to break every solve; it must not."""
+    w = _window()
+    base = simulate_short(w, THETA, None)
+    warm = TwinParams(*THETA.as_vector()[:5], -0.3)
+    cool = TwinParams(*THETA.as_vector()[:5], +0.3)
+    a = PybammTwin("SPMe").simulate(w, warm)
+    b = PybammTwin("SPMe").simulate(w, cool)
+    assert base["ok"] and a["ok"] and b["ok"]
+    # on discharge a negative dU/dT is exothermic, a positive one endothermic
+    assert a["T"][-1] > base["T"][-1] > b["T"][-1]
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_"):

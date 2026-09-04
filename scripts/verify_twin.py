@@ -25,6 +25,7 @@ from pathlib import Path
 import numpy as np
 
 from trsentinel.data.severson import load_severson_windows, window_dict
+from trsentinel.datasets import DATASETS
 from trsentinel.fault import InternalShort, simulate_short
 from trsentinel.split import cell_split, subsample, windows_of
 from trsentinel.twin_pybamm import (
@@ -38,10 +39,9 @@ def energy_balance(window, theta, kind="SPMe", chemistry="Prada2013"):
     t = np.asarray(window["t"], float)
     tw = PybammTwin(kind, chemistry=chemistry)
     p = tw._params_for(theta, t, window["I"], window["T_amb"], window["T0"],
-                       window["Qd_cycle"])
+                       window["Qd_cycle"], float(window.get("soc0", 1.0)))
     sim = pybamm.Simulation(build_model(kind), parameter_values=p)
-    sol = sim.solve(t_eval=[t[0], t[-1]], t_interp=t,
-                    initial_soc=float(window.get("soc0", 1.0)))
+    sol = sim.solve(t_eval=[t[0], t[-1]], t_interp=t)
     vol = p["Cell volume [m3]"]
     Q = np.asarray(sol["Volume-averaged total heating [W.m-3]"].entries) * vol
     Q_contact = np.asarray(window["I"], float) ** 2 * theta.R_contact
@@ -80,16 +80,11 @@ def main():
     args = ap.parse_args()
 
     out = {}
-    for phase, data, fit in (("discharge", "data/severson_discharge.npz",
-                              "runs/twin_fit.json"),
-                             ("charge", "data/severson_charge.npz",
-                              "runs/twin_fit_charge.json"),
-                             ("nasa_discharge", "data/nasa_discharge.npz",
-                              "runs/twin_fit_nasa.json")):
-        if not Path(fit).exists():
+    for phase, ds in DATASETS.items():
+        if not Path(ds["fit"]).exists():
             continue
-        d = load_severson_windows(data)
-        cfg = json.loads(Path(fit).read_text())
+        d = load_severson_windows(ds["data"])
+        cfg = json.loads(Path(ds["fit"]).read_text())
         chem = cfg.get("chemistry", "Prada2013")
         theta = TwinParams(**cfg["theta"])
         idx = subsample(windows_of(d, cell_split(len(d["cells"]))["test"]),

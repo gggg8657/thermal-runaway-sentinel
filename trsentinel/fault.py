@@ -82,19 +82,18 @@ def simulate_short(window, theta: TwinParams, short: InternalShort | None,
 
     t = np.asarray(window["t"], float)
     step = float(t[1] - t[0]) if dt is None else float(dt)
+    if initial_soc is None:
+        initial_soc = float(window.get("soc0", 1.0))
     tw = PybammTwin(kind, chemistry=chemistry)
     p = tw._params_for(theta, t, window["I"], window["T_amb"], window["T0"],
-                       window["Qd_cycle"])
+                       window["Qd_cycle"], initial_soc)
     p["Current function [A]"] = p["Current function [A]"] + pybamm.InputParameter("I_short")
     # _params_for already folded the contact-resistance heat into the ambient
     p["Ambient temperature [K]"] = (p["Ambient temperature [K]"]
                                     + pybamm.InputParameter("dT_amb"))
     hA = theta.h_conv * CELL_AREA_M2
 
-    if initial_soc is None:
-        initial_soc = float(window.get("soc0", 1.0))
     sim = pybamm.Simulation(build_model(kind), parameter_values=p)
-    sim.build(initial_soc=initial_soc)
     n_steps = int(round((t[-1] - t[0]) / step))
     ts = t[0] + step * np.arange(n_steps + 1)
     R_of_t = short.resistance(ts) if short is not None else np.full(ts.shape, np.inf)

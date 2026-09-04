@@ -98,11 +98,14 @@ class TwinParams:
 
 
 def base_parameter_values(chemistry="Prada2013", nominal_Ah=1.1,
-                          v_lo=1.6, v_hi=4.0):
+                          v_lo=1.5, v_hi=4.5):
     """A chemistry set completed with whatever thermal data it is missing.
 
     Cell volume and cooling area are *not* borrowed: they are the true 18650 can
-    geometry, which both datasets this repo uses are built from.
+    geometry, which both datasets this repo uses are built from. The voltage
+    cut-offs are opened out to 1.5-4.5 V: they exist to stop a solver that is
+    being asked to find its own end of discharge, and this twin is instead
+    driven through a measured window, where terminating early is the failure.
     """
     import pybamm
     import re as _re
@@ -131,6 +134,34 @@ def base_parameter_values(chemistry="Prada2013", nominal_Ah=1.1,
 
 
 _ENTROPY_KEY = "Positive electrode OCP entropic change [V.K-1]"
+_STOICH: dict = {}
+
+
+def initial_stoichiometries(base, chemistry, soc0):
+    """Electrode stoichiometries at a given state of charge, computed once.
+
+    PyBAMM's `initial_soc=` shortcut runs an electrode-SOH solve at solve time,
+    and that solve insists every parameter it touches evaluate to a constant.
+    This twin's ambient temperature is a function of time -- that is how the
+    contact-resistance heat is injected -- and once the chemistry has a nonzero
+    entropic coefficient the open-circuit potential depends on temperature, so
+    the shortcut raises `ValueError` on every window. Resolving the
+    stoichiometries here, against the unmodified parameter set, and then setting
+    the initial concentrations explicitly avoids that solve entirely.
+
+    The result depends only on the chemistry and the target SOC: `k_area` and
+    `k_cap` scale electrode volumes and both the maximum *and* the initial
+    concentrations by the same factor, which leaves the stoichiometry window
+    untouched.
+    """
+    import pybamm
+
+    key = (chemistry, float(soc0))
+    if key not in _STOICH:
+        x, y = pybamm.lithium_ion.get_initial_stoichiometries(
+            float(soc0), pybamm.ParameterValues(base))
+        _STOICH[key] = (float(x), float(y))
+    return _STOICH[key]
 
 
 def _add_entropic_change(p, base, dUdT):
@@ -189,17 +220,23 @@ class PybammTwin:
         self._base = None
 
     # -- internals -------------------------------------------------------
-    def _params_for(self, theta, t, I_meas, T_amb_C, T0_C, Qd_Ah,
-                    short_ohm=None, short_onset_s=None):
+    def _params_for(self, theta, t, I_meas, T_amb_C, T0_C, Qd_Ah, soc0=1.0):
         import pybamm
 
         if self._base is None:
             self._base = base_parameter_values(self.chemistry, self.nominal_Ah)
         p = pybamm.ParameterValues(self._base)
-        p["Electrode height [m]"] = self._base["Electrode height [m]"] * theta.k_area
+        p["Electrode height [m]"] = (self._base["Electrode height [m]"]
+                                     * theta.k_area)
+        stoich = dict(zip(("negative", "positive"),
+                          initial_stoichiometries(self._base, self.chemistry,
+                                                  soc0)))
         for el in ("negative", "positive"):
             k = f"Maximum concentration in {el} electrode [mol.m-3]"
-            p[k] = self._base[k] * theta.k_cap * Qd_Ah
+            c_max = self._base[k] * theta.k_cap * Qd_Ah
+            p[k] = c_max
+            p[f"Initial concentration in {el} electrode [mol.m-3]"] = (
+                stoich[el] * c_max)
         p["Contact resistance [Ohm]"] = theta.R_contact
         p["Total heat transfer coefficient [W.m-2.K-1]"] = theta.h_conv
         for k in _HEAT_CAPACITY_KEYS:
@@ -235,12 +272,11 @@ class PybammTwin:
             initial_soc = float(window.get("soc0", 1.0))
         t = np.asarray(window["t"], float)
         p = self._params_for(theta, t, window["I"], window["T_amb"],
-                             window["T0"], window["Qd_cycle"])
+                             window["T0"], window["Qd_cycle"], initial_soc)
         model = build_model(self.kind)
         sim = pybamm.Simulation(model, parameter_values=p)
         try:
-            sol = sim.solve(t_eval=[t[0], t[-1]], t_interp=t,
-                            initial_soc=initial_soc)
+            sol = sim.solve(t_eval=[t[0], t[-1]], t_interp=t)
             V = np.asarray(sol["Terminal voltage [V]"].entries, float)
             T = np.asarray(sol["Volume-averaged cell temperature [C]"].entries,
                            float)
