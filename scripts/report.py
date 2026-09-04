@@ -55,6 +55,12 @@ def pct(x):
     return "-" if x is None else f"{100 * x:.1f}%"
 
 
+def num(d, key, fmt="{:.3f}", scale=1.0):
+    """A score that may be missing because every window failed to solve."""
+    v = (d or {}).get(key)
+    return "-" if v is None else fmt.format(scale * v)
+
+
 def secs(x):
     return "-" if x is None else f"{x:.0f} s"
 
@@ -73,15 +79,24 @@ def sec_data(reports):
             r["distinct_current_profiles"],
             f"{r['peak_dT_median_C']:.1f} K",
         ])
-    return ["## The data: 46 real LFP cells", "",
-            reports["discharge"]["meta"]["source"] + ". "
-            + reports["discharge"]["meta"]["cell"] + ", "
-            + reports["discharge"]["meta"]["chamber"] + ", "
-            + reports["discharge"]["meta"]["channels"] + ".", "",
-            "Two constant-current windows are cut out of every kept cycle. They "
-            "differ in one way that turns out to decide the whole result: on "
-            "discharge every cell in the dataset does exactly the same thing, "
-            "and on charge no two policies agree.", "",
+    corpora = []
+    for key in ("discharge", "nasa"):
+        r = reports.get(key)
+        if not r:
+            continue
+        m = r["meta"]
+        corpora.append(f"- **{m['source']}** -- {m['cell']}, {m['chamber']}. "
+                       f"{m['channels']}. {r['n_cells']} cells.")
+    total = sum(reports[p]["n_cells"] for p in ("discharge", "nasa")
+                if reports.get(p))
+    return [f"## The data: {total} real cells from two laboratories", ""] \
+        + corpora + ["",
+            "Constant-current windows are cut out of every kept cycle. They "
+            "differ in the one way that turns out to decide most of the result: "
+            "every cell in the Severson dataset is discharged identically at "
+            "4C, while the Severson charge policies and the NASA discharges "
+            "vary from cell to cell in both current and chamber temperature.",
+            "",
             table(rows, ["window", "protocol", "windows", "cells", "length",
                          "|I| range", "distinct current profiles",
                          "median peak rise over ambient"]), ""]
@@ -89,12 +104,14 @@ def sec_data(reports):
 
 def sec_twin(fits, verify):
     L = ["## The twin, and whether it tracks a real cell", "",
-         "An SPMe with a lumped thermal submodel on PyBAMM's `Prada2013` "
-         "LFP/graphite chemistry, five identified scalars, fitted separately "
-         "for each duty cycle on 10 cells and scored on cells it never saw. "
-         "The reduced-order twin this repo started with -- two parameters, "
-         "`C dT/dt = R I^2 - hA (T - T_amb)`, fitted on the same windows by "
-         "the same trajectory criterion -- is scored alongside it.", ""]
+         "An SPMe with a lumped thermal submodel, six identified scalars, "
+         "fitted separately for each window set on the fit cells and scored on "
+         "cells it never saw. PyBAMM's `Prada2013` LFP/graphite chemistry is "
+         "used for the Severson cells and `Ramadass2004` LCO for the NASA "
+         "cells. The reduced-order twin this repo started with -- two "
+         "parameters, `C dT/dt = R I^2 - hA (T - T_amb)`, fitted on the same "
+         "windows by the same trajectory criterion -- is scored alongside it.",
+         ""]
     rows = []
     for ph in PHASES:
         f = fits.get(ph)
@@ -105,9 +122,9 @@ def sec_twin(fits, verify):
             rows.append([
                 SHORT[ph], split,
                 f"{f['split_sizes'][split]} cells",
-                f"{1000 * pb['v_rmse']:.0f} mV", f"{pb['t_rmse']:.2f} K",
-                f"{pb['t_rmse_p95']:.2f} K", f"{rom['t_rmse']:.2f} K",
-                pct(pb["frac_ok"]),
+                num(pb, "v_rmse", "{:.0f} mV", 1000), num(pb, "t_rmse", "{:.2f} K"),
+                num(pb, "t_rmse_p95", "{:.2f} K"), num(rom, "t_rmse", "{:.2f} K"),
+                pct(pb.get("frac_ok")),
             ])
     L += [table(rows, ["window", "split", "n", "PyBAMM V rmse",
                        "PyBAMM T rmse", "PyBAMM T rmse p95",
@@ -121,11 +138,13 @@ def sec_twin(fits, verify):
         rows.append([SHORT[ph]] +
                     [f"{f['theta'][k]:.4g}"
                      + ("*" if f.get("at_bound", {}).get(k) else "")
-                     for k in f["theta_names"]] +
+                     if k in f["theta"] else "-" for k in
+                     max((g["theta_names"] for g in fits.values() if g), key=len)] +
                     [f["chemistry"], f["n_objective_evals"],
                      f"{f['fit_wall_s']:.0f} s"])
+    names = max((f["theta_names"] for f in fits.values() if f), key=len)
     L += ["### Identified parameters", "",
-          table(rows, ["window"] + fits["discharge"]["theta_names"]
+          table(rows, ["window"] + names
                 + ["chemistry", "objective evaluations", "fit wall clock"]), "",
           "`*` marks a parameter that landed on the edge of its physical search "
           "box -- the fit wanted something the box would not give it, and the "
@@ -135,9 +154,11 @@ def sec_twin(fits, verify):
     for ph in PHASES:
         c = (fits.get(ph) or {}).get("cross_phase") or {}
         if c.get("test"):
-            cross.append([f"fitted on {ph}, scored on {c['phase']}",
-                          f"{1000 * c['test']['v_rmse']:.0f} mV",
-                          f"{c['test']['t_rmse']:.2f} K"])
+            cross.append([f"fitted on {SHORT[ph]}, scored on "
+                          f"{SHORT.get(c['phase'], c['phase'])}",
+                          num(c["test"], "v_rmse", "{:.0f} mV", 1000),
+                          num(c["test"], "t_rmse", "{:.2f} K"),
+                          pct(c["test"].get("frac_ok"))])
     if cross:
         L += ["### Transfer between duty cycles", "",
               "The same parameters, applied to the other window without "
@@ -145,7 +166,7 @@ def sec_twin(fits, verify):
               "operating point, and the twin is not claimed to be one model "
               "for both.", "",
               table(cross, ["", "V rmse (held-out cells)",
-                            "T rmse (held-out cells)"]), ""]
+                            "T rmse (held-out cells)", "windows solved"]), ""]
 
     if verify:
         rows = []
@@ -285,7 +306,8 @@ def sec_cost(cost):
 
 def headline(reports, fits, fars, lts, verify, cost, a, variant):
     """The headline bullets, each one carrying a number the runs produced."""
-    have = [p for p in PHASES if fars.get(p) and fits.get(p)]
+    have = [p for p in PHASES if fars.get(p) and fits.get(p)
+            and fits[p]["pybamm"]["test"].get("v_rmse") is not None]
     L = []
 
     n_cells = sum(reports[p]["n_cells"] for p in ("discharge", "nasa")
@@ -436,10 +458,10 @@ def build_readme_blocks(reports, fits, fars, lts, verify, cost):
 
     b["twinfit"] = table(
         [[SHORT[p], DATASETS[p]["corpus"], fits[p]["chemistry"],
-          f"{1000 * fits[p]['pybamm']['test']['v_rmse']:.0f} mV",
-          f"{fits[p]['pybamm']['test']['t_rmse']:.2f} K",
-          f"{fits[p]['rom_lumped_lstsq']['test']['t_rmse']:.2f} K",
-          pct(fits[p]["pybamm"]["test"]["frac_ok"]),
+          num(fits[p]["pybamm"]["test"], "v_rmse", "{:.0f} mV", 1000),
+          num(fits[p]["pybamm"]["test"], "t_rmse", "{:.2f} K"),
+          num(fits[p]["rom_lumped_lstsq"]["test"], "t_rmse", "{:.2f} K"),
+          pct(fits[p]["pybamm"]["test"].get("frac_ok")),
           pct((verify.get(p) or {}).get("closure")) if verify else "-"]
          for p in PHASES if fits.get(p)],
         ["window", "corpus", "chemistry", "PyBAMM V rmse", "PyBAMM T rmse",
