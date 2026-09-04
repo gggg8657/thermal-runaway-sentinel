@@ -3,3 +3,7 @@ __pycache__/
 .data/
 .venv/
 .DS_Store
+data/
+*.egg-info/
+runs/*.npz
+runs/*.log

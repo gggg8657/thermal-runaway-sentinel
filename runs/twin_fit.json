@@ -1,0 +1,141 @@
+{
+  "model": "SPMe + lumped thermal (PyBAMM)",
+  "chemistry": "Prada2013 LFP/graphite, Chen2020 thermal properties",
+  "theta": {
+    "k_area": 0.7407611029427323,
+    "k_cap": 1.5393677923386169,
+    "R_contact": 0.005201201350580574,
+    "h_conv": 12.300172569705774,
+    "c_scale": 2.25935376869842
+  },
+  "theta_names": [
+    "k_area",
+    "k_cap",
+    "R_contact",
+    "h_conv",
+    "c_scale"
+  ],
+  "n_fit_windows": 60,
+  "n_eval_windows_per_split": 150,
+  "split_cells": {
+    "fit": [
+      "batch1_cell1",
+      "batch1_cell2",
+      "batch1_cell4",
+      "batch1_cell11",
+      "batch1_cell18",
+      "batch1_cell19",
+      "batch1_cell20",
+      "batch1_cell21",
+      "batch1_cell42",
+      "batch1_cell43"
+    ],
+    "cal": [
+      "batch1_cell3",
+      "batch1_cell6",
+      "batch1_cell10",
+      "batch1_cell16",
+      "batch1_cell22",
+      "batch1_cell23",
+      "batch1_cell27",
+      "batch1_cell28",
+      "batch1_cell30",
+      "batch1_cell32",
+      "batch1_cell35",
+      "batch1_cell39"
+    ],
+    "test": [
+      "batch1_cell0",
+      "batch1_cell5",
+      "batch1_cell7",
+      "batch1_cell8",
+      "batch1_cell9",
+      "batch1_cell12",
+      "batch1_cell13",
+      "batch1_cell14",
+      "batch1_cell15",
+      "batch1_cell17",
+      "batch1_cell24",
+      "batch1_cell25",
+      "batch1_cell26",
+      "batch1_cell29",
+      "batch1_cell31",
+      "batch1_cell33",
+      "batch1_cell34",
+      "batch1_cell36",
+      "batch1_cell37",
+      "batch1_cell38",
+      "batch1_cell40",
+      "batch1_cell41",
+      "batch1_cell44",
+      "batch1_cell45"
+    ]
+  },
+  "split_sizes": {
+    "fit": 10,
+    "cal": 12,
+    "test": 24
+  },
+  "objective": "T_rmse[K] + 10 * V_rmse[V] + 5*(1-frac_solved)",
+  "n_objective_evals": 493,
+  "fit_wall_s": 350.6,
+  "pybamm": {
+    "fit": {
+      "objective": 0.700709768675772,
+      "v_rmse": 0.031080849717839965,
+      "t_rmse": 0.38990127149737236,
+      "frac_ok": 1.0,
+      "n": 150,
+      "t_bias": 0.11966620258122779,
+      "t_rmse_p95": 1.0053007251114805,
+      "v_rmse_p95": 0.09622238610767192
+    },
+    "cal": {
+      "objective": 0.9736557688919376,
+      "v_rmse": 0.031526129765799764,
+      "t_rmse": 0.6583944712339399,
+      "frac_ok": 1.0,
+      "n": 150,
+      "t_bias": 0.14934391618918277,
+      "t_rmse_p95": 1.8421559991298715,
+      "v_rmse_p95": 0.07621037645089107
+    },
+    "test": {
+      "objective": 1.0540165039488993,
+      "v_rmse": 0.03635786342374651,
+      "t_rmse": 0.6904378697114343,
+      "frac_ok": 1.0,
+      "n": 150,
+      "t_bias": 0.05320604834855704,
+      "t_rmse_p95": 1.893692961470965,
+      "v_rmse_p95": 0.10903678931012689
+    }
+  },
+  "rom_lumped_lstsq": {
+    "fit": {
+      "t_rmse": 0.459018720565163,
+      "t_rmse_p95": 0.9521273830708546,
+      "t_bias": 0.1713356585792341,
+      "n": 150,
+      "frac_ok": 1.0
+    },
+    "cal": {
+      "t_rmse": 0.6576421648056097,
+      "t_rmse_p95": 1.9134127044119236,
+      "t_bias": 0.18706684319915912,
+      "n": 150,
+      "frac_ok": 1.0
+    },
+    "test": {
+      "t_rmse": 0.7109767047536636,
+      "t_rmse_p95": 2.0850284104684307,
+      "t_bias": 0.07768088251013944,
+      "n": 150,
+      "frac_ok": 1.0
+    }
+  },
+  "rom_params": {
+    "R_over_C_K_per_J": 0.0002565879396775718,
+    "h_over_C_per_s": -0.000821372804990037
+  }
+}

@@ -1,4 +1,5 @@
 numpy>=1.24
 scipy>=1.10
-pybamm>=24.1
+pybamm>=25.1
+pandas>=2.0
 matplotlib>=3.7

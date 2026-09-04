@@ -1,0 +1,429 @@
+{
+  "SIMULATED": "every lead time below comes from a fault injected into the physics twin and added to a real measured temperature trace; no measured runaway event is involved anywhere",
+  "fault_model": "resistance across the electrodes: shunt current V/R drawn inside the cell plus V^2/R of ohmic heat added to the lumped energy balance",
+  "persist_samples": 6,
+  "dt_s": 5.0,
+  "n_windows": 120,
+  "n_test_cells": 24,
+  "sim_wall_s": 54.5,
+  "sim_s_per_window_per_core": 3.896,
+  "coupling_check": {
+    "window": 5,
+    "dt_coarse_s": 5.0,
+    "dt_fine_s": 1.25,
+    "max_abs_dT_K": 0.06108330916276827,
+    "max_abs_dV_V": 0.004120791649191435
+  },
+  "thresholds_K": {
+    "fleet_calibrated": {
+      "0.05": {
+        "residual": 2.2080210537313363,
+        "no_model": 5.82467788235294
+      },
+      "0.01": {
+        "residual": 2.7866033556723124,
+        "no_model": 6.358482702702705
+      }
+    },
+    "cell_registered": {
+      "0.05": {
+        "residual": 1.8890564266444934,
+        "no_model": 3.565062293089438
+      },
+      "0.01": {
+        "residual": 3.5278721507709525,
+        "no_model": 5.336953104525582
+      }
+    }
+  },
+  "healthy_control": {
+    "fleet_calibrated alpha=0.05": {
+      "far_residual": 0.075,
+      "far_no_model": 0.0667,
+      "n_windows": 120
+    },
+    "fleet_calibrated alpha=0.01": {
+      "far_residual": 0.0333,
+      "far_no_model": 0.0417,
+      "n_windows": 120
+    },
+    "cell_registered alpha=0.05": {
+      "far_residual": 0.075,
+      "far_no_model": 0.0667,
+      "n_windows": 120
+    },
+    "cell_registered alpha=0.01": {
+      "far_residual": 0.0083,
+      "far_no_model": 0.0083,
+      "n_windows": 120
+    }
+  },
+  "faults": {
+    "R=500 ohm (constant)": {
+      "fault": {
+        "R0_ohm": 500.0,
+        "onset_s": 200.0,
+        "R_end_ohm": null,
+        "tau_s": 200.0,
+        "kind": "constant"
+      },
+      "n_windows_simulated": 120,
+      "peak_short_power_W": 0.02,
+      "peak_shunt_current_A": 0.0063,
+      "peak_dT_K": 0.131,
+      "fleet_calibrated alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.1,
+        "detection_rate_no_model": 0.0667,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 497.5,
+        "median_no_model_after_onset_s": 505.0,
+        "median_lead_vs_no_model_s": 25.0,
+        "n_detected_by_residual_only": 4,
+        "n_detected_by_no_model_only": 0
+      },
+      "fleet_calibrated alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0667,
+        "detection_rate_no_model": 0.05,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 542.5,
+        "median_no_model_after_onset_s": 535.0,
+        "median_lead_vs_no_model_s": 0.0,
+        "n_detected_by_residual_only": 2,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.075,
+        "detection_rate_no_model": 0.0667,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 515.0,
+        "median_no_model_after_onset_s": 520.0,
+        "median_lead_vs_no_model_s": 5.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0083,
+        "detection_rate_no_model": 0.0083,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 435.0,
+        "median_no_model_after_onset_s": 445.0,
+        "median_lead_vs_no_model_s": 10.0,
+        "n_detected_by_residual_only": 0,
+        "n_detected_by_no_model_only": 0
+      }
+    },
+    "R=200 ohm (constant)": {
+      "fault": {
+        "R0_ohm": 200.0,
+        "onset_s": 200.0,
+        "R_end_ohm": null,
+        "tau_s": 200.0,
+        "kind": "constant"
+      },
+      "n_windows_simulated": 120,
+      "peak_short_power_W": 0.05,
+      "peak_shunt_current_A": 0.0157,
+      "peak_dT_K": 0.327,
+      "fleet_calibrated alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.1333,
+        "detection_rate_no_model": 0.125,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 487.5,
+        "median_no_model_after_onset_s": 520.0,
+        "median_lead_vs_no_model_s": 15.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      },
+      "fleet_calibrated alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0667,
+        "detection_rate_no_model": 0.0667,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 530.0,
+        "median_no_model_after_onset_s": 527.5,
+        "median_lead_vs_no_model_s": 7.5,
+        "n_detected_by_residual_only": 0,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0917,
+        "detection_rate_no_model": 0.0833,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 515.0,
+        "median_no_model_after_onset_s": 525.0,
+        "median_lead_vs_no_model_s": 10.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0083,
+        "detection_rate_no_model": 0.0083,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 425.0,
+        "median_no_model_after_onset_s": 440.0,
+        "median_lead_vs_no_model_s": 15.0,
+        "n_detected_by_residual_only": 0,
+        "n_detected_by_no_model_only": 0
+      }
+    },
+    "R=100 ohm (constant)": {
+      "fault": {
+        "R0_ohm": 100.0,
+        "onset_s": 200.0,
+        "R_end_ohm": null,
+        "tau_s": 200.0,
+        "kind": "constant"
+      },
+      "n_windows_simulated": 120,
+      "peak_short_power_W": 0.099,
+      "peak_shunt_current_A": 0.0315,
+      "peak_dT_K": 0.654,
+      "fleet_calibrated alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.275,
+        "detection_rate_no_model": 0.2417,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 520.0,
+        "median_no_model_after_onset_s": 535.0,
+        "median_lead_vs_no_model_s": 10.0,
+        "n_detected_by_residual_only": 5,
+        "n_detected_by_no_model_only": 1
+      },
+      "fleet_calibrated alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0667,
+        "detection_rate_no_model": 0.0667,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 507.5,
+        "median_no_model_after_onset_s": 510.0,
+        "median_lead_vs_no_model_s": 12.5,
+        "n_detected_by_residual_only": 0,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.1917,
+        "detection_rate_no_model": 0.175,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 530.0,
+        "median_no_model_after_onset_s": 535.0,
+        "median_lead_vs_no_model_s": 10.0,
+        "n_detected_by_residual_only": 2,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0083,
+        "detection_rate_no_model": 0.0167,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 415.0,
+        "median_no_model_after_onset_s": 487.5,
+        "median_lead_vs_no_model_s": 10.0,
+        "n_detected_by_residual_only": 0,
+        "n_detected_by_no_model_only": 1
+      }
+    },
+    "R=50 ohm (constant)": {
+      "fault": {
+        "R0_ohm": 50.0,
+        "onset_s": 200.0,
+        "R_end_ohm": null,
+        "tau_s": 200.0,
+        "kind": "constant"
+      },
+      "n_windows_simulated": 120,
+      "peak_short_power_W": 0.198,
+      "peak_shunt_current_A": 0.063,
+      "peak_dT_K": 1.306,
+      "fleet_calibrated alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.4417,
+        "detection_rate_no_model": 0.45,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 465.0,
+        "median_no_model_after_onset_s": 500.0,
+        "median_lead_vs_no_model_s": 35.0,
+        "n_detected_by_residual_only": 2,
+        "n_detected_by_no_model_only": 3
+      },
+      "fleet_calibrated alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.275,
+        "detection_rate_no_model": 0.275,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 520.0,
+        "median_no_model_after_onset_s": 525.0,
+        "median_lead_vs_no_model_s": 5.0,
+        "n_detected_by_residual_only": 2,
+        "n_detected_by_no_model_only": 2
+      },
+      "cell_registered alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.5917,
+        "detection_rate_no_model": 0.5417,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 505.0,
+        "median_no_model_after_onset_s": 525.0,
+        "median_lead_vs_no_model_s": 25.0,
+        "n_detected_by_residual_only": 7,
+        "n_detected_by_no_model_only": 1
+      },
+      "cell_registered alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.0333,
+        "detection_rate_no_model": 0.025,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 467.5,
+        "median_no_model_after_onset_s": 535.0,
+        "median_lead_vs_no_model_s": 10.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      }
+    },
+    "R=20 ohm (constant)": {
+      "fault": {
+        "R0_ohm": 20.0,
+        "onset_s": 200.0,
+        "R_end_ohm": null,
+        "tau_s": 200.0,
+        "kind": "constant"
+      },
+      "n_windows_simulated": 120,
+      "peak_short_power_W": 0.496,
+      "peak_shunt_current_A": 0.1574,
+      "peak_dT_K": 3.244,
+      "fleet_calibrated alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.8833,
+        "detection_rate_no_model": 0.875,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 292.5,
+        "median_no_model_after_onset_s": 400.0,
+        "median_lead_vs_no_model_s": 105.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      },
+      "fleet_calibrated alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.8167,
+        "detection_rate_no_model": 0.8167,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 380.0,
+        "median_no_model_after_onset_s": 445.0,
+        "median_lead_vs_no_model_s": 60.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 1
+      },
+      "cell_registered alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.8917,
+        "detection_rate_no_model": 0.8833,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 265.0,
+        "median_no_model_after_onset_s": 385.0,
+        "median_lead_vs_no_model_s": 120.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.7333,
+        "detection_rate_no_model": 0.6417,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 500.0,
+        "median_no_model_after_onset_s": 530.0,
+        "median_lead_vs_no_model_s": 30.0,
+        "n_detected_by_residual_only": 11,
+        "n_detected_by_no_model_only": 0
+      }
+    },
+    "worsening 500->1 ohm (tau=120 s)": {
+      "fault": {
+        "R0_ohm": 500.0,
+        "onset_s": 100.0,
+        "R_end_ohm": 1.0,
+        "tau_s": 120.0,
+        "kind": "exponentially worsening"
+      },
+      "n_windows_simulated": 120,
+      "peak_short_power_W": 2.504,
+      "peak_shunt_current_A": 0.9456,
+      "peak_dT_K": 6.253,
+      "fleet_calibrated alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.925,
+        "detection_rate_no_model": 0.9167,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 500.0,
+        "median_no_model_after_onset_s": 530.0,
+        "median_lead_vs_no_model_s": 30.0,
+        "n_detected_by_residual_only": 2,
+        "n_detected_by_no_model_only": 1
+      },
+      "fleet_calibrated alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.8917,
+        "detection_rate_no_model": 0.8917,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 535.0,
+        "median_no_model_after_onset_s": 555.0,
+        "median_lead_vs_no_model_s": 20.0,
+        "n_detected_by_residual_only": 0,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.05": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.9667,
+        "detection_rate_no_model": 0.9583,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 490.0,
+        "median_no_model_after_onset_s": 525.0,
+        "median_lead_vs_no_model_s": 35.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      },
+      "cell_registered alpha=0.01": {
+        "n_windows": 120,
+        "detection_rate_residual": 0.95,
+        "detection_rate_no_model": 0.9417,
+        "false_alarm_before_onset_residual": 0.0,
+        "false_alarm_before_onset_no_model": 0.0,
+        "median_detect_after_onset_s": 575.0,
+        "median_no_model_after_onset_s": 590.0,
+        "median_lead_vs_no_model_s": 15.0,
+        "n_detected_by_residual_only": 1,
+        "n_detected_by_no_model_only": 0
+      }
+    }
+  }
+}
