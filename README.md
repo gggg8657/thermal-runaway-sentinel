@@ -40,6 +40,14 @@ writes — see [`RESULTS.md`](RESULTS.md). Nothing is hand-typed.
 ## Headline
 
 <!-- BEGIN:headline -->
+- **The conformal promise survives the move between real cells.** Calibrated at alpha=0.05 on cells held out for it and measured on cells used for nothing else, the false-alarm rate comes out at **0.052** on severson 4c discharge (598 windows, 24 unseen cells), **0.029** on severson fast charge (583 windows, 24 unseen cells), **0.234** on nasa pcoe discharge (526 windows, 15 unseen cells). Those are real-data numbers and they are the ones that decide whether the method is usable.
+- **The twin tracks real cells across two chemistries.** On cells it never saw: severson 4c discharge **31 mV / 0.68 K**; severson fast charge **51 mV / 0.67 K**; nasa pcoe discharge **181 mV / 1.35 K**.
+- **And the physics upgrade does not buy a quieter temperature residual.** The two-parameter lumped twin this repo started with, fitted on the same trajectories, reaches 0.66 K on severson 4c discharge, 0.53 K on severson fast charge, 2.43 K on nasa pcoe discharge -- no worse on 2 of the 3 window sets. What the physics buys is a voltage prediction, parameters that are physical quantities, and somewhere to inject a fault; a model with no voltage state cannot host a resistance across the electrodes.
+- **The heat balance had to be repaired before any of this meant anything.** PyBAMM's default heat generation closes only 84% of the `I (U - V)` energy balance at 4C -- heat of mixing is off by default, the contact resistance contributes a voltage drop without its own dissipation, and `Prada2013` carries no entropic coefficient at all, which is why the real cells' endothermic first minute of fast charge was unreachable. With all three restored the balance closes to **97.6%** and the identified thermal time constant is 548 s on a 91 J/K cell.
+- **Lead time, and it is simulated.** A worsening internal short injected into the twin and added to a real measured trace is caught in 94.2% of severson 4c discharge windows, 12.5% of severson fast charge windows, 93.3% of nasa pcoe discharge windows, a median 55 s (severson 4c discharge), -8 s (severson fast charge), 140 s (nasa pcoe discharge) before a model-free temperature alarm calibrated to the same false-alarm rate. No measured runaway event is involved anywhere.
+- **Cheap enough to run online.** One 780 s window through the PyBAMM twin takes **0.55 s** on one core -- 1426x faster than the cell lives it -- so a 1000-cell fleet costs 547 core-seconds per cycle. CPU only; no GPU is used or wanted.
+
+Measured on 76 real cells from two laboratories, 3717 constant-current windows in total.
 <!-- END:headline -->
 
 ## The corpora: 76 real cells from two laboratories
@@ -54,6 +62,11 @@ Three constant-current windows are cut out of them, and the difference between
 the first and the other two decides most of the result:
 
 <!-- BEGIN:data -->
+| window | windows | cells | distinct current profiles | \|I\| range | median peak rise |
+|---|---|---|---|---|---|
+| Severson 4C discharge (identical duty cycle for every cell) | 1285 | 46 | 2 | 2.5-4.0 A | 4.7 K |
+| Severson fast charge (each cell's own 3.6C-8C policy) | 1221 | 46 | 28 | 3.0-8.0 A | 3.7 K |
+| NASA PCoE discharge (1-4 A, chamber at 4 / 24 / 43 C) | 1211 | 30 | 11 | 1.0-4.0 A | 6.6 K |
 <!-- END:data -->
 
 Every cell in the Severson dataset is discharged the same way — 4C to 2.0 V — so
@@ -84,6 +97,11 @@ identified. Ageing enters as a measurement, not a fit: each window's inventory i
 set from the capacity that cycle actually delivered.
 
 <!-- BEGIN:twinfit -->
+| window | corpus | chemistry | PyBAMM V rmse | PyBAMM T rmse | reduced-order T rmse | windows solved | energy-balance closure |
+|---|---|---|---|---|---|---|---|
+| Severson 4C discharge | Severson (TRI) batch1, LFP 18650 | Prada2013 | 31 mV | 0.68 K | 0.66 K | 100.0% | 97.6% |
+| Severson fast charge | Severson (TRI) batch1, LFP 18650 | Prada2013 | 51 mV | 0.67 K | 0.53 K | 100.0% | 94.3% |
+| NASA PCoE discharge | NASA Ames PCoE, LCO 18650 | Ramadass2004 | 181 mV | 1.35 K | 2.43 K | 99.3% | 106.2% |
 <!-- END:twinfit -->
 
 ![twin fit](assets/fig_twin_fit.png)
@@ -120,6 +138,17 @@ summarises the rule and can be used directly as a conformal nonconformity score
 — which makes `P(alarm | healthy) ≤ α` a finite-sample statement.
 
 <!-- BEGIN:far -->
+| window | detector | threshold at alpha=0.05 | measured false-alarm rate | windows fired |
+|---|---|---|---|---|
+| Severson 4C discharge | PyBAMM SPMe + lumped thermal | 1.59 K | 0.052 | 31/598 |
+| Severson 4C discharge | reduced-order lumped twin | 1.78 K | 0.075 | 45/598 |
+| Severson 4C discharge | no model (T - T_amb) | 3.57 K | 0.047 | 28/598 |
+| Severson fast charge | PyBAMM SPMe + lumped thermal | 1.70 K | 0.029 | 17/583 |
+| Severson fast charge | reduced-order lumped twin | 1.27 K | 0.046 | 27/583 |
+| Severson fast charge | no model (T - T_amb) | 2.25 K | 0.043 | 25/583 |
+| NASA PCoE discharge | PyBAMM SPMe + lumped thermal | 2.14 K | 0.234 | 123/526 |
+| NASA PCoE discharge | reduced-order lumped twin | 1.73 K | 0.268 | 141/526 |
+| NASA PCoE discharge | no model (T - T_amb) | 7.00 K | 0.183 | 96/526 |
 <!-- END:far -->
 
 ![false alarms](assets/fig_far.png)
@@ -147,6 +176,26 @@ them is the practical finding:
 > cells above. No measured runaway event is involved anywhere.
 
 <!-- BEGIN:leadtime -->
+| window | simulated fault | peak short power | temperature rise caused | detected (physics residual) | detected (no model) | median lead over the no-model alarm |
+|---|---|---|---|---|---|---|
+| Severson 4C discharge | R=500 ohm (constant) | 0.02 W | 0.09 K | 6.7% | 6.7% | 20 s |
+| Severson 4C discharge | R=200 ohm (constant) | 0.05 W | 0.21 K | 7.5% | 6.7% | 30 s |
+| Severson 4C discharge | R=100 ohm (constant) | 0.10 W | 0.43 K | 14.2% | 9.2% | 40 s |
+| Severson 4C discharge | R=50 ohm (constant) | 0.20 W | 0.85 K | 35.0% | 22.5% | 50 s |
+| Severson 4C discharge | R=20 ohm (constant) | 0.49 W | 2.11 K | 87.5% | 82.5% | 140 s |
+| Severson 4C discharge | worsening 500->1 ohm | 2.21 W | 4.88 K | 94.2% | 95.0% | 55 s |
+| Severson fast charge | R=500 ohm (constant) | 0.03 W | 0.01 K | 2.5% | 4.2% | 0 s |
+| Severson fast charge | R=200 ohm (constant) | 0.06 W | 0.02 K | 2.5% | 5.0% | 0 s |
+| Severson fast charge | R=100 ohm (constant) | 0.12 W | 0.04 K | 3.3% | 5.0% | -8 s |
+| Severson fast charge | R=50 ohm (constant) | 0.25 W | 0.09 K | 4.2% | 5.0% | -8 s |
+| Severson fast charge | R=20 ohm (constant) | 0.62 W | 0.21 K | 10.0% | 7.5% | -5 s |
+| Severson fast charge | worsening 500->1 ohm | 4.41 W | 0.52 K | 12.5% | 8.3% | -8 s |
+| NASA PCoE discharge | R=500 ohm (constant) | 0.03 W | 0.21 K | 14.2% | 13.3% | 20 s |
+| NASA PCoE discharge | R=200 ohm (constant) | 0.07 W | 0.53 K | 14.2% | 14.2% | 40 s |
+| NASA PCoE discharge | R=100 ohm (constant) | 0.15 W | 1.06 K | 21.7% | 16.7% | 50 s |
+| NASA PCoE discharge | R=50 ohm (constant) | 0.30 W | 2.11 K | 60.0% | 19.2% | 80 s |
+| NASA PCoE discharge | R=20 ohm (constant) | 0.75 W | 5.26 K | 90.8% | 40.0% | 160 s |
+| NASA PCoE discharge | worsening 500->1 ohm | 4.79 W | 14.13 K | 93.3% | 98.3% | 140 s |
 <!-- END:leadtime -->
 
 ![lead time](assets/fig_leadtime.png)
@@ -161,6 +210,11 @@ uncalibrated fixed trip point would say nothing.
 ## What it costs to run
 
 <!-- BEGIN:cost -->
+| window | PyBAMM twin, one window |  | reduced-order twin | 1000 cells, one cycle |
+|---|---|---|---|---|
+| Severson 4C discharge | 0.55 s | 1426x real time | 0.43 ms | 547 core-s |
+| Severson fast charge | 0.38 s | 526x real time | 0.11 ms | 380 core-s |
+| NASA PCoE discharge | 0.80 s | 1128x real time | 0.13 ms | 798 core-s |
 <!-- END:cost -->
 
 ## The synthetic demo
