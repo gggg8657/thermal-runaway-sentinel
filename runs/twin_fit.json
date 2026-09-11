@@ -4,51 +4,80 @@
   "data": "data/severson_discharge.npz",
   "cross_phase": {
     "fit": {
-      "objective": 2.9415794969457036,
-      "v_rmse": 0.09775615996700854,
-      "t_rmse": 1.9640178972756182,
+      "objective": 2.5828018059821956,
+      "v_rmse": 0.0745727396731317,
+      "t_rmse": 1.8370744092508786,
       "frac_ok": 1.0,
       "n": 150,
-      "t_bias": -1.8143188774067214,
-      "t_rmse_p95": 2.28890554788771,
-      "v_rmse_p95": 0.11396926653940329
+      "t_bias": -1.704620107874711,
+      "t_rmse_p95": 2.1342193419747932,
+      "v_rmse_p95": 0.08969455539930526
     },
     "cal": {
-      "objective": 2.9844741838015327,
-      "v_rmse": 0.099590949047173,
-      "t_rmse": 1.988564693329803,
+      "objective": 2.5963640293458115,
+      "v_rmse": 0.0768439975572865,
+      "t_rmse": 1.8279240537729462,
       "frac_ok": 1.0,
       "n": 150,
-      "t_bias": -1.8616205652291524,
-      "t_rmse_p95": 2.2592734926492604,
-      "v_rmse_p95": 0.12480453645586327
+      "t_bias": -1.717750204904788,
+      "t_rmse_p95": 2.0939802148984468,
+      "v_rmse_p95": 0.10099233229472447
     },
     "test": {
-      "objective": 3.1393734125403783,
-      "v_rmse": 0.09768671908548145,
-      "t_rmse": 2.1625062216855637,
+      "objective": 2.748511902026025,
+      "v_rmse": 0.0748445226315115,
+      "t_rmse": 2.0000666757109102,
       "frac_ok": 1.0,
       "n": 150,
-      "t_bias": -2.0032910710036242,
-      "t_rmse_p95": 3.0469782438704627,
-      "v_rmse_p95": 0.11771220845609559
+      "t_bias": -1.8578920449296554,
+      "t_rmse_p95": 2.853654026311632,
+      "v_rmse_p95": 0.09529165348938272
     },
     "phase": "charge"
   },
-  "chemistry": "Prada2013 LFP/graphite, Chen2020 thermal properties",
+  "chemistry": "Prada2013",
+  "borrowed_from_donor": [
+    "Negative current collector thickness [m]",
+    "Negative current collector conductivity [S.m-1]",
+    "Positive current collector thickness [m]",
+    "Positive current collector conductivity [S.m-1]",
+    "Cell volume [m3]",
+    "Total heat transfer coefficient [W.m-2.K-1]",
+    "Cell cooling surface area [m2]",
+    "Negative current collector density [kg.m-3]",
+    "Negative current collector specific heat capacity [J.kg-1.K-1]",
+    "Negative electrode density [kg.m-3]",
+    "Negative electrode specific heat capacity [J.kg-1.K-1]",
+    "Separator density [kg.m-3]",
+    "Separator specific heat capacity [J.kg-1.K-1]",
+    "Positive electrode density [kg.m-3]",
+    "Positive electrode specific heat capacity [J.kg-1.K-1]",
+    "Positive current collector density [kg.m-3]",
+    "Positive current collector specific heat capacity [J.kg-1.K-1]"
+  ],
+  "at_bound": {
+    "k_area": false,
+    "k_cap": false,
+    "R_contact": false,
+    "h_conv": false,
+    "c_scale": false,
+    "dUdT_mV_per_K": false
+  },
   "theta": {
-    "k_area": 0.6944623591677425,
-    "k_cap": 1.1093743678510932,
-    "R_contact": 0.006423976465066735,
-    "h_conv": 38.697735349836876,
-    "c_scale": 3.3179418541456718
+    "k_area": 0.6078866578682321,
+    "k_cap": 1.0436245440159564,
+    "R_contact": 0.006021412727942407,
+    "h_conv": 39.61947343811367,
+    "c_scale": 3.5070098918654855,
+    "dUdT_mV_per_K": 0.00045486529692984057
   },
   "theta_names": [
     "k_area",
     "k_cap",
     "R_contact",
     "h_conv",
-    "c_scale"
+    "c_scale",
+    "dUdT_mV_per_K"
   ],
   "n_fit_windows": 60,
   "n_eval_windows_per_split": 150,
@@ -112,38 +141,38 @@
     "test": 24
   },
   "objective": "T_rmse[K] + 10 * V_rmse[V] + 5*(1-frac_solved)",
-  "n_objective_evals": 413,
-  "fit_wall_s": 699.0,
+  "n_objective_evals": 590,
+  "fit_wall_s": 1041.5,
   "pybamm": {
     "fit": {
-      "objective": 0.7299345030303606,
-      "v_rmse": 0.035217622509941385,
-      "t_rmse": 0.3777582779309468,
+      "objective": 0.6564733897995003,
+      "v_rmse": 0.029713448718960058,
+      "t_rmse": 0.3593389026098998,
       "frac_ok": 1.0,
       "n": 150,
-      "t_bias": 0.08307085725057066,
-      "t_rmse_p95": 0.9751075882531484,
-      "v_rmse_p95": 0.09353441062465949
+      "t_bias": 0.07978520547378296,
+      "t_rmse_p95": 0.9738857182135433,
+      "v_rmse_p95": 0.049703628239547826
     },
     "cal": {
-      "objective": 0.9813872807575534,
-      "v_rmse": 0.03478089567275556,
-      "t_rmse": 0.6335783240299978,
+      "objective": 0.9202492321649878,
+      "v_rmse": 0.028844974473818046,
+      "t_rmse": 0.6317994874268072,
       "frac_ok": 1.0,
       "n": 150,
-      "t_bias": 0.10151887045495321,
-      "t_rmse_p95": 1.8512770418515982,
-      "v_rmse_p95": 0.07323946173707295
+      "t_bias": 0.10671673226441655,
+      "t_rmse_p95": 1.8462136392394775,
+      "v_rmse_p95": 0.04890441371952687
     },
     "test": {
-      "objective": 1.0755552163776887,
-      "v_rmse": 0.03922085574603189,
-      "t_rmse": 0.6833466589173698,
+      "objective": 0.9866516020446139,
+      "v_rmse": 0.030754785139315722,
+      "t_rmse": 0.6791037506514567,
       "frac_ok": 1.0,
       "n": 150,
-      "t_bias": 0.005822956069784695,
-      "t_rmse_p95": 1.9277857866067432,
-      "v_rmse_p95": 0.10522152619808535
+      "t_bias": 0.007330784475136352,
+      "t_rmse_p95": 1.8984907518875576,
+      "v_rmse_p95": 0.05437688508101496
     }
   },
   "rom_lumped_lstsq": {

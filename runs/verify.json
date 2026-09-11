@@ -1,26 +1,44 @@
 {
   "discharge": {
-    "Q_pybamm_W": 0.60487,
-    "Q_contact_W": 0.10278,
-    "Q_terminal_balance_W": 0.71301,
-    "closure": 0.98864,
-    "C_eff_J_per_K": 84.68846,
-    "hA_W_per_K": 0.16193,
-    "tau_s": 522.97939,
-    "lumped_reintegration_max_err_K": 0.11611,
+    "Q_pybamm_W": 0.59428,
+    "Q_contact_W": 0.09634,
+    "Q_terminal_balance_W": 0.71052,
+    "closure": 0.97635,
+    "C_eff_J_per_K": 90.82658,
+    "hA_W_per_K": 0.16579,
+    "tau_s": 547.8355,
+    "lumped_reintegration_max_err_K": 0.10077,
     "n_windows": 8,
-    "fault_coupling_dt5_vs_dt1.25_max_K": 0.006
+    "fault_coupling_step_vs_quarter_step_max_K": 0.00708,
+    "chemistry": "Prada2013",
+    "borrowed_parameters": 17
   },
   "charge": {
-    "Q_pybamm_W": 2.19828,
-    "Q_contact_W": 0.24496,
-    "Q_terminal_balance_W": 2.58495,
-    "closure": 0.94247,
-    "C_eff_J_per_K": 130.19917,
-    "hA_W_per_K": 0.83692,
-    "tau_s": 155.56939,
-    "lumped_reintegration_max_err_K": 0.09177,
+    "Q_pybamm_W": 2.06034,
+    "Q_contact_W": 0.81895,
+    "Q_terminal_balance_W": 3.0672,
+    "closure": 0.94293,
+    "C_eff_J_per_K": 320.1537,
+    "hA_W_per_K": 1.25538,
+    "tau_s": 255.02525,
+    "lumped_reintegration_max_err_K": 0.07248,
     "n_windows": 8,
-    "fault_coupling_dt5_vs_dt1.25_max_K": 0.00024
+    "fault_coupling_step_vs_quarter_step_max_K": 0.00014,
+    "chemistry": "Prada2013",
+    "borrowed_parameters": 17
+  },
+  "nasa": {
+    "Q_pybamm_W": 0.15089,
+    "Q_contact_W": 0.24069,
+    "Q_terminal_balance_W": 0.36898,
+    "closure": 1.06236,
+    "C_eff_J_per_K": 19.77973,
+    "hA_W_per_K": 0.10178,
+    "tau_s": 194.34223,
+    "lumped_reintegration_max_err_K": 1.31838,
+    "n_windows": 8,
+    "fault_coupling_step_vs_quarter_step_max_K": 0.16238,
+    "chemistry": "Ramadass2004",
+    "borrowed_parameters": 3
   }
 }

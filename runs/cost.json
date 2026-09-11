@@ -1,0 +1,42 @@
+{
+  "cpu": "x86_64",
+  "note": "single core, no parallelism",
+  "phases": {
+    "discharge": {
+      "label": "Severson 4C discharge",
+      "chemistry": "Prada2013",
+      "window_s": 780.0,
+      "n_timesteps": 157,
+      "pybamm_twin_s_per_window": 0.5469,
+      "pybamm_twin_realtime_factor": 1426.2,
+      "pybamm_stepped_s_per_window": 2.2933,
+      "reduced_order_twin_s_per_window": 0.000431,
+      "reduced_order_realtime_factor": 1810690.6,
+      "fleet_of_1000_cells_core_seconds_per_cycle": 546.9
+    },
+    "charge": {
+      "label": "Severson fast charge",
+      "chemistry": "Prada2013",
+      "window_s": 200.0,
+      "n_timesteps": 41,
+      "pybamm_twin_s_per_window": 0.3803,
+      "pybamm_twin_realtime_factor": 525.9,
+      "pybamm_stepped_s_per_window": 0.5748,
+      "reduced_order_twin_s_per_window": 0.000114,
+      "reduced_order_realtime_factor": 1752189.7,
+      "fleet_of_1000_cells_core_seconds_per_cycle": 380.3
+    },
+    "nasa": {
+      "label": "NASA PCoE discharge",
+      "chemistry": "Ramadass2004",
+      "window_s": 900.0,
+      "n_timesteps": 46,
+      "pybamm_twin_s_per_window": 0.7976,
+      "pybamm_twin_realtime_factor": 1128.4,
+      "pybamm_stepped_s_per_window": 1.3045,
+      "reduced_order_twin_s_per_window": 0.000129,
+      "reduced_order_realtime_factor": 6975453.1,
+      "fleet_of_1000_cells_core_seconds_per_cycle": 797.6
+    }
+  }
+}

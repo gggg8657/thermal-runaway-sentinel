@@ -4,11 +4,12 @@
       "source": "Severson et al. 2019 (TRI/Stanford/MIT fast-charging dataset), batch1",
       "cell": "A123 APR18650M1A, LFP/graphite 18650, 1.1 Ah nominal, 3.3 V",
       "chamber": "30 C forced convection",
-      "discharge": "4C constant current (-4.0 A) to 2.0 V, identical for every cell",
       "channels": "I [A], V [V], T [degC] (thermocouple on the can), 5 s sampling"
     },
+    "phase": "discharge",
+    "protocol": "4C constant current to 2.0 V, identical for every cell",
     "raw_pickle": "/home/dongjukim/Documents/workspace/repos/PyBAMM_Inverse/data/raw/batch1.pkl",
-    "raw_load_s": 3.0,
+    "raw_load_s": 3.4,
     "n_cells": 46,
     "cycle_stride": 25,
     "n_windows": 1285,
@@ -17,18 +18,26 @@
     "dt_s": 5.0,
     "T_amb_median_C": 30.47,
     "peak_dT_median_C": 4.72,
+    "abs_current_median_A": 4.0,
+    "abs_current_range_A": [
+      2.52,
+      4.01
+    ],
+    "distinct_current_profiles": 2,
     "Qd_range_Ah": [
       0.992,
       1.098
     ],
-    "prepare_s": 3.6
+    "prepare_s": 4.0
   },
+  "phase": "discharge",
+  "twin_fit": "runs/twin_fit.json",
   "persist_samples": 6,
   "persist_s": 30.0,
   "n_windows": 1285,
   "twin_solve_failures": 0,
-  "twin_wall_s": 13.9,
-  "twin_s_per_window": 0.648,
+  "twin_wall_s": 20.9,
+  "twin_s_per_window": 0.976,
   "split_sizes": {
     "fit": 10,
     "cal": 12,
@@ -41,99 +50,99 @@
       "fleet_calibrated": [
         {
           "alpha": 0.2,
-          "threshold_K": 1.6683050123486538,
-          "far": 0.18507462686567164,
+          "threshold_K": 1.3396704774854058,
+          "far": 0.20746268656716418,
           "n_test_windows": 670,
-          "n_fired": 124,
-          "cells_with_any_alarm": 17,
+          "n_fired": 139,
+          "cells_with_any_alarm": 12,
+          "n_test_cells": 24,
+          "worst_cell_far": 0.9629629629629629
+        },
+        {
+          "alpha": 0.1,
+          "threshold_K": 1.569544067971954,
+          "far": 0.14776119402985075,
+          "n_test_windows": 670,
+          "n_fired": 99,
+          "cells_with_any_alarm": 9,
           "n_test_cells": 24,
           "worst_cell_far": 0.8518518518518519
         },
         {
-          "alpha": 0.1,
-          "threshold_K": 1.9806412362946162,
-          "far": 0.11940298507462686,
-          "n_test_windows": 670,
-          "n_fired": 80,
-          "cells_with_any_alarm": 10,
-          "n_test_cells": 24,
-          "worst_cell_far": 0.7037037037037037
-        },
-        {
           "alpha": 0.05,
-          "threshold_K": 2.2080210537313363,
-          "far": 0.07313432835820896,
+          "threshold_K": 1.841410554076802,
+          "far": 0.08507462686567165,
           "n_test_windows": 670,
-          "n_fired": 49,
-          "cells_with_any_alarm": 10,
+          "n_fired": 57,
+          "cells_with_any_alarm": 8,
           "n_test_cells": 24,
-          "worst_cell_far": 0.4444444444444444
+          "worst_cell_far": 0.6129032258064516
         },
         {
           "alpha": 0.02,
-          "threshold_K": 2.4684765369024646,
-          "far": 0.04776119402985075,
+          "threshold_K": 1.9543207575206694,
+          "far": 0.05970149253731343,
           "n_test_windows": 670,
-          "n_fired": 32,
+          "n_fired": 40,
           "cells_with_any_alarm": 7,
           "n_test_cells": 24,
-          "worst_cell_far": 0.2962962962962963
+          "worst_cell_far": 0.45161290322580644
         },
         {
           "alpha": 0.01,
-          "threshold_K": 2.7866033556723124,
-          "far": 0.025373134328358207,
+          "threshold_K": 2.256049184102281,
+          "far": 0.03731343283582089,
           "n_test_windows": 670,
-          "n_fired": 17,
-          "cells_with_any_alarm": 5,
+          "n_fired": 25,
+          "cells_with_any_alarm": 6,
           "n_test_cells": 24,
-          "worst_cell_far": 0.18518518518518517
+          "worst_cell_far": 0.25925925925925924
         }
       ],
       "cell_registered": [
         {
           "alpha": 0.2,
-          "threshold_K": 1.6105354310066666,
-          "far": 0.12207357859531773,
+          "threshold_K": 1.4175044525492575,
+          "far": 0.1020066889632107,
           "n_test_windows": 598,
-          "n_fired": 73,
-          "cells_with_any_alarm": 16,
+          "n_fired": 61,
+          "cells_with_any_alarm": 10,
           "n_test_cells": 24,
-          "worst_cell_far": 0.76
+          "worst_cell_far": 1.0
         },
         {
           "alpha": 0.1,
-          "threshold_K": 1.6856272952455262,
-          "far": 0.07692307692307693,
+          "threshold_K": 1.5510066617706828,
+          "far": 0.06521739130434782,
           "n_test_windows": 598,
-          "n_fired": 46,
-          "cells_with_any_alarm": 14,
+          "n_fired": 39,
+          "cells_with_any_alarm": 7,
           "n_test_cells": 24,
-          "worst_cell_far": 0.35714285714285715
+          "worst_cell_far": 0.52
         },
         {
           "alpha": 0.05,
-          "threshold_K": 1.8890564266444934,
-          "far": 0.05852842809364549,
+          "threshold_K": 1.585219353707271,
+          "far": 0.051839464882943144,
           "n_test_windows": 598,
-          "n_fired": 35,
-          "cells_with_any_alarm": 10,
+          "n_fired": 31,
+          "cells_with_any_alarm": 7,
           "n_test_cells": 24,
           "worst_cell_far": 0.2916666666666667
         },
         {
           "alpha": 0.02,
-          "threshold_K": 2.2841231056435967,
-          "far": 0.020066889632107024,
+          "threshold_K": 1.7327725892851242,
+          "far": 0.026755852842809364,
           "n_test_windows": 598,
-          "n_fired": 12,
+          "n_fired": 16,
           "cells_with_any_alarm": 5,
           "n_test_cells": 24,
-          "worst_cell_far": 0.16
+          "worst_cell_far": 0.24
         },
         {
           "alpha": 0.01,
-          "threshold_K": 3.5278721507709525,
+          "threshold_K": 3.325182701830481,
           "far": 0.005016722408026756,
           "n_test_windows": 598,
           "n_fired": 3,
@@ -144,8 +153,8 @@
       ],
       "n_cal_windows_registered": 297,
       "n_test_windows_registered": 598,
-      "residual_rms_test_K": 0.968932042028007,
-      "residual_bias_spread_K": 0.6005050642333712
+      "residual_rms_test_K": 0.9707098258958202,
+      "residual_bias_spread_K": 0.59895083368737
     },
     "rom_lumped": {
       "fleet_calibrated": [
